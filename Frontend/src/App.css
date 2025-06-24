@@ -1,0 +1,11 @@
+#root {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh; /* full height of viewport */
+}
+
+/* Your main content area */
+.app-content {
+  flex: 1; /* takes up all available space */
+  padding: 16px;
+}

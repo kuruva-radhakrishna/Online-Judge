@@ -21,6 +21,7 @@ router.get('/:id', isLoggedIn, async (req, res) => {
     //return submissions made by the current user on the specific problem
     try {
         const id = req.params.id;
+        console.log('Submissions');
         console.log(id);
         const submissionsByUser = await Submission.find({ user_id: req.user._id, problem_id: id });
         if (!submissionsByUser) {

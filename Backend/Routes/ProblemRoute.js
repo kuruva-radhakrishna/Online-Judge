@@ -4,8 +4,9 @@ const {isLoggedIn } = require('../middleware.js');
 const Problem = require('../Models/Problems.js');
 const Contest = require('../Models/Contests.js');
 
-router.get('/', isLoggedIn, async (req, res) => {
+router.get('/',isLoggedIn ,async (req, res) => {
     try {
+        console.log('get problems');
         const now = new Date();
 
         const activeContests = await Contest.find({

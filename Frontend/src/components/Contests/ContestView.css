@@ -1,0 +1,13 @@
+.contest-view {
+  padding: 32px 0;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.contest-view h1 {
+  font-size: 2rem;
+  color: #222;
+  margin-bottom: 24px;
+} 

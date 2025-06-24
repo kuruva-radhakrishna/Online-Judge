@@ -1,0 +1,38 @@
+.problem-discussion {
+  max-width: 900px;
+  margin: 40px auto;
+  padding: 28px 22px;
+  background: #fff;
+  border-radius: 14px;
+  box-shadow: 0 2px 16px rgba(0,0,0,0.06);
+  color: #222;
+}
+
+.problem-discussion h2, .problem-discussion h3 {
+  font-weight: 700;
+  margin-bottom: 16px;
+  color: #222;
+}
+
+.problem-discussion p {
+  margin-bottom: 14px;
+  line-height: 1.7;
+  color: #333;
+}
+
+.problem-discussion .comment {
+  background: #f5f7fa;
+  border-radius: 8px;
+  padding: 12px 16px;
+  margin-bottom: 14px;
+  color: #444;
+  font-size: 0.98rem;
+}
+
+@media (max-width: 600px) {
+  .problem-discussion {
+    padding: 10px 2px;
+    margin: 16px 0;
+    border-radius: 8px;
+  }
+} 

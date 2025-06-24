@@ -1,0 +1,99 @@
+.problem-view {
+  max-width: 1200px;
+  margin: 40px auto;
+  padding: 24px;
+  background: #fff;
+  border-radius: 14px;
+  box-shadow: 0 2px 16px rgba(0,0,0,0.06);
+}
+
+.problem-view .row {
+  display: flex;
+  gap: 32px;
+  align-items: flex-start;
+}
+
+.problem-view .problem {
+  width: 50%;
+}
+
+.problem-view .problem-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 1rem;
+}
+
+.problem-view .solution {
+  width: 50%;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.problem-view .language-select {
+  margin-bottom: 0;
+  margin-left: 16px;
+  padding: 7px 12px;
+  border-radius: 6px;
+  border: 1px solid #e0e0e0;
+  font-size: 1rem;
+  height: 40px;
+}
+
+.problem-view button {
+  background: #ffa116;
+  color: #222;
+  border: none;
+  border-radius: 7px;
+  padding: 8px 18px;
+  font-weight: 500;
+  margin-right: 10px;
+  margin-bottom: 10px;
+  cursor: pointer;
+  transition: background 0.18s, color 0.18s;
+}
+
+.problem-view button:hover {
+  background: #ffb84d;
+  color: #222;
+}
+
+.problem-view select {
+  /* now styled via .language-select */
+}
+
+.problem-view .code {
+  background: #f5f7fa;
+  border-radius: 8px;
+  min-height: 120px;
+  padding: 14px;
+  font-family: 'Fira Mono', 'Consolas', monospace;
+  font-size: 1rem;
+  color: #222;
+  margin-bottom: 10px;
+}
+
+@media (max-width: 900px) {
+  .problem-view .row {
+    flex-direction: column;
+    gap: 0;
+  }
+  .problem-view .problem, .problem-view .solution {
+    width: 100%;
+  }
+  .problem-view {
+    padding: 8px;
+    margin: 16px 0;
+    border-radius: 8px;
+  }
+  .problem-view .problem-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+  .problem-view .language-select {
+    margin-left: 0;
+    width: 100%;
+  }
+} 

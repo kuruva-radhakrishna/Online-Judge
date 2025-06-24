@@ -1,0 +1,67 @@
+.problems {
+  max-width: 900px;
+  margin: 40px auto;
+  padding: 24px;
+  background: #fff;
+  border-radius: 14px;
+  box-shadow: 0 2px 16px rgba(0,0,0,0.06);
+  overflow-x: auto;
+}
+
+.problems table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  background: transparent;
+}
+
+.problems th, .problems td {
+  padding: 14px 16px;
+  text-align: left;
+}
+
+.problems th {
+  background: #f5f7fa;
+  color: #222;
+  font-weight: 600;
+  font-size: 1.05rem;
+  border-bottom: 2px solid #f0f1f3;
+}
+
+.problems tr {
+  transition: background 0.18s;
+}
+
+.problems tr:hover {
+  background: #f9fafc;
+}
+
+.problems td {
+  font-size: 1rem;
+  color: #333;
+  border-bottom: 1px solid #f0f1f3;
+}
+
+.problems a {
+  color: #ffa116;
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.18s;
+}
+
+.problems a:hover {
+  color: #ff9800;
+  text-decoration: underline;
+}
+
+@media (max-width: 600px) {
+  .problems {
+    padding: 8px;
+    margin: 16px 0;
+    border-radius: 8px;
+  }
+  .problems th, .problems td {
+    padding: 8px 6px;
+    font-size: 0.97rem;
+  }
+} 

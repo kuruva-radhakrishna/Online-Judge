@@ -1,0 +1,89 @@
+body {
+  background: #f5f7fa;
+}
+
+.signup-bg {
+  min-height: 100vh;
+  background: #f5f6fa;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.signup-card {
+  width: 100%;
+  max-width: 400px;
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.10);
+  padding: 40px 32px 28px 32px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.signup-logo {
+  width: 56px;
+  height: 56px;
+  margin-bottom: 12px;
+}
+
+.signup-title {
+  font-weight: 700;
+  margin-bottom: 18px !important;
+  color: #222;
+}
+
+.signup-card .MuiTextField-root {
+  margin-bottom: 18px;
+}
+
+.signup-card .MuiButton-root {
+  margin-top: 18px;
+  font-weight: bold;
+  background: #ffa116;
+  color: #222;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  transition: background 0.2s;
+  box-shadow: none;
+}
+.signup-card .MuiButton-root:hover {
+  background: #ffb84d;
+}
+
+.signup-link {
+  margin-top: 10px !important;
+  color: #666;
+}
+.signup-link a {
+  color: #ffa116;
+  text-decoration: none;
+  font-weight: 500;
+}
+.signup-link a:hover {
+  text-decoration: underline;
+}
+
+.signup-socials {
+  margin-top: 10px;
+  display: flex;
+  gap: 18px;
+  justify-content: center;
+}
+.signup-social-icon {
+  font-size: 2rem !important;
+  color: #bdbdbd;
+  cursor: pointer;
+  transition: color 0.2s;
+}
+.signup-social-icon:hover {
+  color: #ffa116;
+}
+
+@media (max-width: 500px) {
+  .signup-card {
+    padding: 18px 4px 12px 4px;
+    max-width: 98vw;
+  }
+}

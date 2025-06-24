@@ -1,0 +1,55 @@
+.problem-submissions {
+  max-width: 900px;
+  margin: 40px auto;
+  padding: 24px;
+  background: #fff;
+  border-radius: 14px;
+  box-shadow: 0 2px 16px rgba(0,0,0,0.06);
+  overflow-x: auto;
+}
+
+.problem-submissions table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  background: transparent;
+}
+
+.problem-submissions th, .problem-submissions td {
+  padding: 12px 14px;
+  text-align: left;
+}
+
+.problem-submissions th {
+  background: #f5f7fa;
+  color: #222;
+  font-weight: 600;
+  font-size: 1.02rem;
+  border-bottom: 2px solid #f0f1f3;
+}
+
+.problem-submissions tr {
+  transition: background 0.18s;
+}
+
+.problem-submissions tr:hover {
+  background: #f9fafc;
+}
+
+.problem-submissions td {
+  font-size: 0.98rem;
+  color: #333;
+  border-bottom: 1px solid #f0f1f3;
+}
+
+@media (max-width: 600px) {
+  .problem-submissions {
+    padding: 8px;
+    margin: 16px 0;
+    border-radius: 8px;
+  }
+  .problem-submissions th, .problem-submissions td {
+    padding: 7px 4px;
+    font-size: 0.93rem;
+  }
+} 

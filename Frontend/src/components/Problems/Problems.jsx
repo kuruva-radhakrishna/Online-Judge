@@ -13,16 +13,19 @@ function Problems() {
                 const result = await axios.get('http://localhost:3000/problems', {
                     withCredentials: true
                 });
+                if(!result || !result.data){
+                    return <h1>Login</h1>
+                }
                 setProblems(result.data);
                 console.log(result);
             } catch (error) {
                 console.error(error);
-                alert("Internal Server Error");
+                return <h1>Login</h1>
             }
         };
 
         fetchData();
-    }, []);
+    }, [problems]);
 
     return (
         <div className="problems">

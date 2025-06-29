@@ -2,7 +2,7 @@ import { Routes, Route, Link, useParams, useNavigate } from "react-router-dom";
 import ProblemDescription from "./ProblemDescription";
 import ProblemSubmissions from "./ProblemSubmissions";
 import { useEffect, useState } from "react";
-import axios from "axios";
+import axios, { Axios } from "axios";
 import './ProblemView.css';
 import CodeEditor from './CodeEditor';
 import InputOutputConsole from './InputOutputConsole';
@@ -19,6 +19,18 @@ function Problem() {
     const [verdict, setVerdict] = useState('');
     const Navigate = useNavigate();
 
+    const handle_Run = async function(){
+        try {
+            const result = axios.post("http://localhost:8000/run",{
+                language,
+                code,
+                input
+            });
+            console.log(result.data);
+        } catch (error) {
+            
+        }
+    }
     useEffect(() => {
         const fetchProblem = async () => {
             try {
@@ -44,13 +56,34 @@ function Problem() {
     }
 
     // Dummy run/submit handlers
-    const handleRun = () => {
-        setOutput('Sample output...');
-        setVerdict('Accepted');
+    const handleRun = async () => {
+        try {
+            const result = await axios.post("http://localhost:8000/run",{
+                language,
+                code,
+                input
+            });
+            console.log(result.data);
+            if(result.data.output) {
+                setOutput(result.data.output.output);
+            }
+            if(result.data.errorType){
+                setOutput(result.data.errorType);
+            }
+        } catch (error) {
+            console.log(error);
+        }
     };
-    const handleSubmit = () => {
-        setOutput('Sample output...');
-        setVerdict('Wrong Answer');
+    const handleSubmit = async () => {
+        try {
+            const result =  await axios.post(`http://localhost:3000/submissions/${id}`,{
+                problem_id : id,
+                language,
+                code,
+            })
+        } catch (error) {
+            
+        }
     };
 
     return (

@@ -17,7 +17,7 @@ const SubmissionSchema = mongoose.Schema({
     },
     language : {
         type : String,
-        enum : ["c","c++","python"],
+        enum : ["c","cpp","python"],
         required : true,
     },
     code : {
@@ -34,11 +34,9 @@ const SubmissionSchema = mongoose.Schema({
     },
     executionTime : {
         type : Number,
-        required : true,
     },
     memoryUsed : {
         type : Number,
-        required : true,
     },
     isInContest : {
         type : Boolean,

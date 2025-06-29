@@ -1,9 +1,9 @@
 .problem-submissions {
   max-width: 900px;
-  margin: 40px auto;
+  margin: 32px auto 32px 0;
   padding: 24px;
   background: #fff;
-  border-radius: 14px;
+  border-radius: 12px;
   box-shadow: 0 2px 16px rgba(0,0,0,0.06);
   overflow-x: auto;
 }
@@ -42,10 +42,30 @@
   border-bottom: 1px solid #f0f1f3;
 }
 
-@media (max-width: 600px) {
+.view-code-link {
+  background: #ffa116;
+  color: #222;
+  padding: 6px 16px;
+  border-radius: 6px;
+  text-decoration: none;
+  font-weight: 500;
+  transition: background 0.18s, color 0.18s;
+  border: none;
+  cursor: pointer;
+  display: inline-block;
+}
+
+.view-code-link:hover {
+  background: #ff9800;
+  color: #fff;
+  text-decoration: underline;
+}
+
+@media (max-width: 900px) {
   .problem-submissions {
+    width: 100%;
+    margin: 16px 0 16px 0;
     padding: 8px;
-    margin: 16px 0;
     border-radius: 8px;
   }
   .problem-submissions th, .problem-submissions td {

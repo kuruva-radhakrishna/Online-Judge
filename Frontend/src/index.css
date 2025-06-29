@@ -1,24 +1,7 @@
-html, #root {
-  margin: 0 !important;
-  padding: 0 !important;
-  background: #f5f7fa;
-  box-sizing: border-box;
-}
 
 body {
-  margin-top: 80px;
-  height: 100%;
+  padding-top: 56px; /* adjust if your navbar height is different */
+  margin: 0;
+  font-family: 'Roboto', sans-serif;
+  background-color: #f8f9fa; /* optional: subtle background */
 }
-
-#root {
-  display: flex;
-  flex-direction: column;
-  min-height: 100vh; /* full height of viewport */
-}
-
-/* Your main content area */
-.app-content {
-  flex: 1; /* takes up all available space */
-  padding: 16px;
-}
-

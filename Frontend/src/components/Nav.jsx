@@ -7,7 +7,7 @@ import './Nav.css';
 
 function Nav() {
   return (
-    <AppBar position="fixed" className="nav-appbar" mb="5">
+    <AppBar position="sticky" className="nav-appbar" mb="5" component="nav">
       <Toolbar>
         <Link to="/" className="navbar-logo" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center' }}>
           <span style={{ color: '#ffa116', fontWeight: 700, fontSize: '1.7rem', fontFamily: 'monospace' }}>O</span>

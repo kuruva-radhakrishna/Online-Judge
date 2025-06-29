@@ -16,21 +16,55 @@ function Problem() {
     const [code, setCode] = useState('');
     const [input, setInput] = useState('');
     const [output, setOutput] = useState('');
-    const [verdict, setVerdict] = useState('');
+    const [verdicts, setVerdicts] = useState([]);
+    const [submissions, setSubmissions] = useState([]);
     const Navigate = useNavigate();
 
-    const handle_Run = async function(){
+    useEffect(() => {
+        switch (language) {
+            case "c++":
+                setCode(`#include <bits/stdc++.h>\nusing namespace std;\n\nint main() {\n    // your code here\n    return 0;\n}`);
+                break;
+            case "python":
+                setCode(`def main():\n    # your code here\n    pass\n\nif __name__ == "__main__":\n    main()`);
+                break;
+            case "java":
+                setCode(`public class Main {\n    public static void main(String[] args) {\n        // your code here\n    }\n}`);
+                break;
+            default:
+                setCode(`#include <bits/stdc++.h>\nusing namespace std;\n\nint main() {\n    // your code here\n    return 0;\n}`);
+        }
+    }, [language]);
+
+    const handle_Run = async function () {
         try {
-            const result = axios.post("http://localhost:8000/run",{
+            const result = axios.post("http://localhost:8000/run", {
                 language,
                 code,
                 input
             });
             console.log(result.data);
         } catch (error) {
-            
+
         }
     }
+
+    // Fetch submissions
+    const fetchSubmissions = async () => {
+        try {
+            const result = await axios.get(`http://localhost:3000/submissions/${id}`, {
+                withCredentials: true
+            });
+            if (result && result.data) {
+                setSubmissions(result.data);
+            } else {
+                setSubmissions([]);
+            }
+        } catch (error) {
+            setSubmissions([]);
+        }
+    };
+
     useEffect(() => {
         const fetchProblem = async () => {
             try {
@@ -49,6 +83,7 @@ function Problem() {
             }
         };
         fetchProblem();
+        fetchSubmissions();
     }, [id, Navigate]);
 
     if (!problem) {
@@ -58,16 +93,16 @@ function Problem() {
     // Dummy run/submit handlers
     const handleRun = async () => {
         try {
-            const result = await axios.post("http://localhost:8000/run",{
+            const result = await axios.post("http://localhost:8000/run", {
                 language,
                 code,
                 input
-            });
+            }, { withCredentials: true });
             console.log(result.data);
-            if(result.data.output) {
+            if (result.data.output) {
                 setOutput(result.data.output.output);
             }
-            if(result.data.errorType){
+            if (result.data.errorType) {
                 setOutput(result.data.errorType);
             }
         } catch (error) {
@@ -76,13 +111,20 @@ function Problem() {
     };
     const handleSubmit = async () => {
         try {
-            const result =  await axios.post(`http://localhost:3000/submissions/${id}`,{
-                problem_id : id,
-                language,
-                code,
-            })
+            const result = await axios.post(`http://localhost:3000/submissions/${id}`,
+                {
+                    problem_id: id,
+                    language,
+                    code,
+                },
+                { withCredentials: true }
+            );
+
+            console.log(result);
+            setVerdicts(result.data);
+            fetchSubmissions();
         } catch (error) {
-            
+
         }
     };
 
@@ -96,7 +138,7 @@ function Problem() {
                     </div>
                     <Routes>
                         <Route path="description" element={<ProblemDescription />} />
-                        <Route path="submissions" element={<ProblemSubmissions />} />
+                        <Route path="submissions" element={<ProblemSubmissions submissions={submissions} refreshSubmissions={fetchSubmissions} />} />
                     </Routes>
                 </div>
                 {/* Right section: Code editor and controls */}
@@ -111,13 +153,13 @@ function Problem() {
                         <option value="java">Java</option>
                         <option value="python">Python</option>
                     </select>
-                    <CodeEditor value={code} onChange={e => setCode(e.target.value)} language={language} />
+                    <CodeEditor value={code} onChange={setCode} language={language} />
                     <InputOutputConsole inputValue={input} onInputChange={e => setInput(e.target.value)} outputValue={output} isOutput={true} />
                     <Box display="flex" gap={2} mt={2}>
                         <button onClick={handleRun}>Run</button>
                         <button onClick={handleSubmit}>Submit</button>
                     </Box>
-                    <Verdict verdict={verdict} />
+                    <Verdict verdicts={verdicts} />
                 </div>
             </div>
         </div>

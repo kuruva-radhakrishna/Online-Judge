@@ -9,7 +9,6 @@ router.get('/problems/', isLoggedIn, isAdmin, async (req, res) => {
     try {
         console.log(req.user);
         console.log("Logged-in user ID:", req.user._id.toString());
-
         const allProblems = await Problem.find({});
         console.log(allProblems);
         const problemsByUser = await Problem.find({ CreatedBy: req.user._id });

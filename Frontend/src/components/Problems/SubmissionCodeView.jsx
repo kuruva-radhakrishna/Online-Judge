@@ -3,6 +3,19 @@ import { useEffect, useState } from 'react';
 import axios from 'axios';
 import './ProblemSubmissions.css';
 
+function formatFormalDate(dateStr) {
+  const date = new Date(dateStr);
+  const day = date.getDate().toString().padStart(2, '0');
+  const month = date.toLocaleString('en-GB', { month: 'long' });
+  const year = date.getFullYear();
+  let hour = date.getHours();
+  const minute = date.getMinutes().toString().padStart(2, '0');
+  const ampm = hour >= 12 ? 'pm' : 'am';
+  hour = hour % 12;
+  hour = hour ? hour : 12; // the hour '0' should be '12'
+  return `${day} ${month} ${year} at ${hour}:${minute} ${ampm}`;
+}
+
 function SubmissionCodeView() {
   const { id } = useParams();
   const [submission, setSubmission] = useState(null);
@@ -36,7 +49,7 @@ function SubmissionCodeView() {
       <div style={{marginBottom: 16}}>
         <b>Language:</b> {submission.language} <br/>
         <b>Verdict:</b> {submission.verdict} <br/>
-        <b>Submitted At:</b> {new Date(submission.submittedAt).toLocaleString()} <br/>
+        <b>Submitted At:</b> {formatFormalDate(submission.submittedAt)} <br/>
       </div>
       <div>
         <b>Code:</b>

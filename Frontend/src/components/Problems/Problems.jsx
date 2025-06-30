@@ -5,30 +5,50 @@ import './Problems.css';
 
 function Problems() {
     const [problems, setProblems] = useState([]);
+    const [error, setError] = useState("");
+    const [success, setSuccess] = useState("");
+    const [loading, setLoading] = useState(true);
 
     // ✅ Use useEffect to call the data fetching function when the component mounts
     useEffect(() => {
         const fetchData = async () => {
+            setLoading(true);
+            setError("");
+            setSuccess("");
             try {
                 const result = await axios.get('http://localhost:3000/problems', {
                     withCredentials: true
                 });
-                if(!result || !result.data){
-                    return <h1>Login</h1>
+                if (!result || !result.data || result.data.length === 0) {
+                    setError("Problems not found.");
+                    setProblems([]);
+                } else {
+                    setProblems(result.data);
+                    setSuccess("Problems loaded successfully!");
                 }
-                setProblems(result.data);
-                console.log(result);
             } catch (error) {
-                console.error(error);
-                return <h1>Login</h1>
+                setError("Loading issues. Please try again later.");
+                setProblems([]);
+            } finally {
+                setLoading(false);
             }
         };
 
         fetchData();
-    }, [problems]);
+    }, []);
+
+    useEffect(() => {
+        if (success) {
+            const timer = setTimeout(() => setSuccess(""), 2000);
+            return () => clearTimeout(timer);
+        }
+    }, [success]);
 
     return (
         <div className="problems">
+            {loading && <p style={{ color: 'blue', textAlign: 'center' }}>Loading problems...</p>}
+            {error && <p style={{ color: 'red', textAlign: 'center' }}>{error}</p>}
+            {success && !loading && !error && <p style={{ color: 'green', textAlign: 'center' }}>{success}</p>}
             <table>
                 <thead>
                     <tr>

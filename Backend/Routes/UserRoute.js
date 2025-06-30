@@ -14,15 +14,16 @@ router.post('/register', async (req, res) => {
         if (existinguser) {
             return res.status(400).json({ "message": `user with the email ${email} already exists` });
         }
-        const registeredUser = await User.register(newUser, password);
+        const user = await User.register(newUser, password);
 
-        req.logIn(registeredUser, (err) => {
+        req.logIn(user, (err) => {
             if (err) {
                 console.log(err);
                 return res.status(500).json({ error: 'Login failed after registration' });
             }
 
-            res.json({ message: 'User registered !', userId: registeredUser._id });
+            const { password, ...userSafe } = user.toObject ? user.toObject() : user;
+            res.json({ message: `Welcome back ${user.firstname + " " + user.lastname} `, user: userSafe });
         });
 
     } catch (err) {
@@ -43,10 +44,33 @@ router.post('/login', (req, res, next) => {
             if (err) {
                 return res.status(500).json({ error: 'Login Failed' })
             }
-            res.json({ message: `Welcome back ${user.firstname + " " + user.lastname} ` });
+            // Remove sensitive info before sending user object
+            const { password, ...userSafe } = user.toObject ? user.toObject() : user;
+            res.json({ message: `Welcome back ${user.firstname + " " + user.lastname} `, user: userSafe });
         })
     })(req, res, next);
 });
 
+// Check authentication status
+router.get('/auth/check', (req, res) => {
+    if (req.isAuthenticated && req.isAuthenticated()) {
+        // Remove sensitive info before sending user object
+        const { password, ...userSafe } = req.user.toObject ? req.user.toObject() : req.user;
+        res.json({ user: userSafe });
+    } else {
+        res.status(401).json({ user: null });
+    }
+});
+
+// Logout route
+router.post('/logout', (req, res) => {
+    req.logout(function(err) {
+        if (err) { return res.status(500).json({ error: 'Logout failed' }); }
+        req.session.destroy(() => {
+            res.clearCookie('connect.sid'); // default session cookie name
+            res.json({ message: 'Logged out successfully' });
+        });
+    });
+});
 
 module.exports.UserRoute = router;

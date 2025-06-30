@@ -9,7 +9,7 @@ router.get('/', isLoggedIn, async (req, res) => {
     //return all submissions of User
 
     try {
-        const submissionsByUser = await Submission.find({ user_id: req.user._id });
+        const submissionsByUser = await Submission.find({ user_id: req.user._id }).populate('problem_id');
         if (!submissionsByUser) {
             return res.status(500).json({ message: "Database Issue" });
         }

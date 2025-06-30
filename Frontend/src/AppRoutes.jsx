@@ -13,6 +13,17 @@ import ContestDiscussions from './components/Contests/ContestDiscussions';
 import ContestSubmissions from './components/Contests/ContestSubmissions';
 import Nav from './components/Nav';
 import SubmissionCodeView from './components/Problems/SubmissionCodeView';
+import { useAuth } from './contexts/AuthContext';
+import Profile from './components/Profile';
+import Home from './components/Home';
+
+function ProtectedRoute({ children }) {
+  const { user, loading } = useAuth();
+  const location = useLocation();
+  if (loading) return null; // or a loading spinner
+  if (!user) return <Navigate to="/login" state={{ from: location }} replace />;
+  return children;
+}
 
 function AppRoutes() {
   // Always show Nav
@@ -21,11 +32,19 @@ function AppRoutes() {
       <Nav />
       <div style={{ position: 'relative', minHeight: '100vh' }}>
         <Routes>
-          <Route path="/" element={<h1>Welcome to Online Judge</h1>} />
+          <Route path="/" element={<Home />} />
           <Route path="/signup" element={<SignUp />} />
           <Route path="/login" element={<Login />} />
-          <Route path="/problems" element={<Problems />} />
-          <Route path="/problem/:id/*" element={<Problem />}>
+          <Route path="/problems" element={
+            <ProtectedRoute>
+              <Problems />
+            </ProtectedRoute>
+          } />
+          <Route path="/problem/:id/*" element={
+            <ProtectedRoute>
+              <Problem />
+            </ProtectedRoute>
+          }>
             <Route index element={<Navigate to="description" />} />
             <Route path="description" element={<ProblemDescription />} />
             <Route path="submissions" element={<ProblemSubmissions />} />
@@ -38,6 +57,7 @@ function AppRoutes() {
             <Route path='discussions' element={<ContestDiscussions />} />
           </Route>
           <Route path="/submission/:id" element={<SubmissionCodeView />} />
+          <Route path='/profile' element = {<Profile />} />
         </Routes>
       </div>
     </>

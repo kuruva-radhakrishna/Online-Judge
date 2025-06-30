@@ -10,27 +10,37 @@ import GitHubIcon from '@mui/icons-material/GitHub';
 import FacebookIcon from '@mui/icons-material/Facebook';
 import MoreHorizIcon from '@mui/icons-material/MoreHoriz';
 import './SignUp.css';
+import { useAuth } from "../../contexts/AuthContext";
 
 function SignUp() {
     const [firstname , setFirstname] = useState("");
     const [lastname , setLastname] = useState("");
     const [email , setEmail] = useState("");
     const [password , setPassword] = useState(""); 
+    const [error, setError] = useState("");
+    const [success, setSuccess] = useState("");
     const navigate = useNavigate();
+    const { setUser } = useAuth();
     const handleSubmit = async function(e){
         e.preventDefault();
+        setError("");
+        setSuccess("");
         try {
             const result =  await axios.post("http://localhost:3000/register",{
                 firstname : firstname,
                 lastname : lastname,
                 email : email,
                 password : password
-            });
-            console.log(result);
-            navigate('/problems');
+            }, { withCredentials: true });
+            setUser(result.data.user);
+            setSuccess('Registration successful! Redirecting...');
+            setTimeout(() => navigate('/problems'), 1000);
         } catch (error) {
-            console.log(error);
-            alert('Internal Server Issue');
+            if (error.response && error.response.data && error.response.data.message) {
+                setError(error.response.data.message);
+            } else {
+                setError('Internal Server Issue');
+            }
         }
     }
     return (
@@ -43,6 +53,8 @@ function SignUp() {
                 <TextField label="Email" type="email" variant="outlined" fullWidth margin="normal" value={email} onChange={e => setEmail(e.target.value)} />
                 <TextField label="Password" type="password" variant="outlined" fullWidth margin="normal" value={password} onChange={e => setPassword(e.target.value)} />
                 <Button variant="contained" color="primary" fullWidth sx={{ mt: 2, mb: 1, py: 1.2, fontWeight: 600, fontSize: '1.1rem' }} type="submit">Sign Up</Button>
+                {error && <p style={{ color: 'red', marginTop: '10px', textAlign: 'center' }}>{error}</p>}
+                {success && <p style={{ color: 'green', marginTop: '10px', textAlign: 'center' }}>{success}</p>}
                 <Typography variant="body2" align="center" className="signup-link">
                     Already have an account? <Link to="/login">Login</Link>
                 </Typography>

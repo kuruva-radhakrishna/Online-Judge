@@ -63,7 +63,7 @@ app.use(
 app.use(passport.initialize());
 app.use(passport.session());
 
-app.use("/", UserRoute);
+app.use("/", UserRoute); // Handles /register, /login, /auth/check, etc.
 
 app.use("/problems", ProblemRoute);
 

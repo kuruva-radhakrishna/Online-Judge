@@ -30,7 +30,7 @@ const executeCpp = async function (filePath, inputFilePath) {
             }
 
             // ✅ Step 2: Run the executable with input redirection
-            const runCommand = `cmd /c "${outputFilePath}" < "${inputFilePath}"`;
+            const runCommand = `"${outputFilePath}" < "${inputFilePath}"`;
             const start = process.hrtime(); // start timer
 
             exec(runCommand, (runError, runOut, runErr) => {

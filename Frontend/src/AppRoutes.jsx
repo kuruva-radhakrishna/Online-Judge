@@ -16,6 +16,8 @@ import SubmissionCodeView from './components/Problems/SubmissionCodeView';
 import { useAuth } from './contexts/AuthContext';
 import Profile from './components/Profile';
 import Home from './components/Home';
+import NewProblem from './components/Problems/NewProblem';
+import EditProblem from './components/Problems/EditProblem';
 
 function ProtectedRoute({ children }) {
   const { user, loading } = useAuth();
@@ -40,6 +42,11 @@ function AppRoutes() {
               <Problems />
             </ProtectedRoute>
           } />
+          <Route path="/problems/new" element={
+            <ProtectedRoute>
+              <NewProblem />
+            </ProtectedRoute>
+          } />
           <Route path="/problem/:id/*" element={
             <ProtectedRoute>
               <Problem />
@@ -50,6 +57,7 @@ function AppRoutes() {
             <Route path="submissions" element={<ProblemSubmissions />} />
             <Route path="discussions" element={<ProblemDiscussion />} />
           </Route>
+          <Route path="/problems/:id/edit" element={<EditProblem />} />
           <Route path='/contests' element={<Contests />} />
           <Route path='/contests/:id/*' element={<ContestView />} >
             <Route path='leaderboard' element={<ContestLeaderBoard />} />

@@ -98,6 +98,35 @@
   margin-top: 32px !important;
 }
 
+.ai-review-container {
+  margin-top: 24px;
+  padding: 18px 20px;
+  background: #f5f7fa;
+  border: 1.5px solid #ffa116;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(255,161,22,0.08);
+}
+
+.ai-review-container h3 {
+  margin-top: 0;
+  color: #ffa116;
+  font-size: 1.2rem;
+  margin-bottom: 10px;
+}
+
+.ai-review-content {
+  font-size: 1rem;
+  color: #222;
+  white-space: pre-line;
+}
+
+.problem-view button:disabled {
+  background: #e0e0e0;
+  color: #888;
+  cursor: not-allowed;
+  border: 1.5px solid #ccc;
+}
+
 @media (max-width: 900px) {
   .problem-view .row {
     flex-direction: column;

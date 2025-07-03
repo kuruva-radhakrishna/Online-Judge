@@ -23,11 +23,17 @@ function Profile() {
     const { user } = useAuth();
     const [solved, setSolved] = useState([0, 0, 0]);
     const [total, setTotal] = useState([0, 0, 0]);
+    const [deleteMsg, setDeleteMsg] = useState("");
 
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const result = await axios.get('http://localhost:3000/problems', { withCredentials: true });
+                let result;
+                if (user && user.role === 'admin') {
+                    result = await axios.get('http://localhost:3000/admin/problems/', { withCredentials: true });
+                } else {
+                    result = await axios.get('http://localhost:3000/problems', { withCredentials: true });
+                }
                 const submissions = await axios.get('http://localhost:3000/submissions/', { withCredentials: true });
                 setProblems(result.data || []);
                 setSubmissionsByUser(submissions.data || []);
@@ -36,7 +42,7 @@ function Profile() {
             }
         };
         fetchData();
-    }, []);
+    }, [user]);
 
     useEffect(() => {
         // Build solved set
@@ -58,6 +64,20 @@ function Profile() {
         setTotal(t);
         setSolved(s);
     }, [problems, submissionsByUser]);
+
+    const handleDeleteProblem = async (problemId) => {
+        if (!window.confirm("Are you sure you want to delete this problem? This will also delete all submissions for this problem.")) return;
+        try {
+            const result = await axios.delete(`http://localhost:3000/admin/problems/${problemId}`, { withCredentials: true });
+            console.log(result);
+            setProblems(problems.filter(p => p._id !== problemId));
+            setDeleteMsg("Problem deleted successfully.");
+            setTimeout(() => setDeleteMsg(""), 2000);
+        } catch (err) {
+            setDeleteMsg("Failed to delete problem.");
+            setTimeout(() => setDeleteMsg(""), 2000);
+        }
+    };
 
     if (!user) {
         return <div>Loading profile...</div>;
@@ -93,6 +113,45 @@ function Profile() {
                     </Box>
                 </Box>
             </Card>
+            {user && user.role === 'admin' && (
+                <>
+                <Card sx={{ p: 2, boxShadow: 1, mb: 4 }}>
+                    <Typography variant="h6" fontWeight={600} mb={2}>Problems You Created</Typography>
+                    <TableContainer component={Paper} sx={{ mb: 2 }}>
+                        <Table>
+                            <TableHead>
+                                <TableRow>
+                                    <TableCell>S.No</TableCell>
+                                    <TableCell>Problem Name</TableCell>
+                                    <TableCell>Created At</TableCell>
+                                    <TableCell>Edit</TableCell>
+                                </TableRow>
+                            </TableHead>
+                            <TableBody>
+                                {problems && problems.length > 0 ? (
+                                    problems.map((problem, idx) => (
+                                        <TableRow key={problem._id}>
+                                            <TableCell>{idx + 1}</TableCell>
+                                            <TableCell>{problem.problemName}</TableCell>
+                                            <TableCell>{formatFormalDate(problem.CreatedAt)}</TableCell>
+                                            <TableCell>
+                                                <Link to={`/problems/${problem._id}/edit`} style={{ color: '#1976d2', marginRight: 12 }}>Edit</Link>
+                                                <button onClick={() => handleDeleteProblem(problem._id)} style={{ color: 'red', border: 'none', background: 'none', cursor: 'pointer' }}>Delete</button>
+                                            </TableCell>
+                                        </TableRow>
+                                    ))
+                                ) : (
+                                    <TableRow>
+                                        <TableCell colSpan={4} align="center">No problems created.</TableCell>
+                                    </TableRow>
+                                )}
+                            </TableBody>
+                        </Table>
+                    </TableContainer>
+                </Card>
+                </>
+            )}
+            {deleteMsg && <div style={{ color: deleteMsg.includes('success') ? 'green' : 'red', marginBottom: 8 }}>{deleteMsg}</div>}
             <Card sx={{ p: 2, boxShadow: 1 }}>
                 <Typography variant="h6" fontWeight={600} mb={2}>Your Submissions</Typography>
                 <TableContainer component={Paper}>

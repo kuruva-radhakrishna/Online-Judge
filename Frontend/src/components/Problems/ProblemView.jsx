@@ -8,6 +8,7 @@ import CodeEditor from './CodeEditor';
 import InputOutputConsole from './InputOutputConsole';
 import Verdict from './Verdict';
 import Box from '@mui/material/Box';
+import ReactMarkdown from 'react-markdown';
 
 function Problem() {
     const { id } = useParams();
@@ -18,6 +19,8 @@ function Problem() {
     const [output, setOutput] = useState('');
     const [verdicts, setVerdicts] = useState([]);
     const [submissions, setSubmissions] = useState([]);
+    const [review , setReview] = useState('');
+    const [aiReviewClicked, setAIReviewClicked] = useState(false);
     const Navigate = useNavigate();
 
     useEffect(() => {
@@ -127,6 +130,19 @@ function Problem() {
 
         }
     };
+    const handleAIReview = async ()=>{
+        setAIReviewClicked(true);
+        try {
+            const result = await axios.post('http://localhost:3000/ai/review',
+                {code},{withCredentials:true}
+            );
+            setReview(result.data.review);
+            setAIReviewClicked(false);
+        } catch (error) {
+            setReview('AI review failed.');
+            setAIReviewClicked(false);
+        }
+    }
 
     return (
         <div className="problem-view">
@@ -158,7 +174,14 @@ function Problem() {
                     <Box display="flex" gap={2} mt={2}>
                         <button onClick={handleRun}>Run</button>
                         <button onClick={handleSubmit}>Submit</button>
+                        <button onClick={handleAIReview} disabled={aiReviewClicked}>AI Review</button>
                     </Box>
+                    {review && (
+                        <div className="ai-review-container">
+                            <h3>AI Review</h3>
+                            <div className="ai-review-content"><ReactMarkdown>{review}</ReactMarkdown></div>
+                        </div>
+                    )}
                     <Verdict verdicts={verdicts} />
                 </div>
             </div>

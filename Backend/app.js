@@ -18,6 +18,7 @@ const { ContestRoute } = require("./Routes/ContestRoute.js");
 const { AdminRoute } = require("./Routes/AdminRoute.js");
 
 const cors = require("cors");
+const { AIRoute } = require("./Routes/AIRoute.js");
 
 app.use(cors({
   origin: 'http://localhost:5173', // ✅ must match your frontend
@@ -64,6 +65,8 @@ app.use(passport.initialize());
 app.use(passport.session());
 
 app.use("/", UserRoute); // Handles /register, /login, /auth/check, etc.
+
+app.use('/ai',AIRoute);
 
 app.use("/problems", ProblemRoute);
 

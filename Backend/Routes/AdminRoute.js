@@ -43,14 +43,14 @@ router.patch('/problems/:id/update', isLoggedIn, isAdmin, async (req, res) => {
     try {
         const id = req.params.id;
         const old_problem = await Problem.findById(id);
-        if (old_problem.createdBy.toString() != req.user_id.toString()) {
+        if (!old_problem.CreatedBy.equals(req.user._id)) {
             return res.status(400).json({ message: "you are not authorized to update this problem" });
         }
-        const result = Problem.findByIdAndUpdate({ _id: id }, { $set: req.body.problem });
+        const result = await Problem.findByIdAndUpdate({ _id: id }, { $set: req.body.problem });
         if (!result) {
             return res.status(500).json({ message: "Database Issue. Unable to update the problem" });
         }
-        res.status(200).json({ message: "Successfully update the problem " });
+        res.status(200).json({ message: "Successfully updated the problem" });
     } catch (error) {
         res.status(500).json({ message: "Internal Sever Issue" });
     }
@@ -62,24 +62,21 @@ router.delete('/problems/:id', isLoggedIn, isAdmin, async (req, res) => {
     // Change the problem array if the problem is present in any contest make it null 
 
     try {
-        const id = req.params.id;
-
+        const {id} = req.params;
         const old_problem = await Problem.findById(id);
 
-        console.log(old_problem.CreatedBy);
-        console.log(req.user._id);
-        if (old_problem.CreatedBy.equals(req.user._id)) {
-            const result = await Problem.findByIdAndDelete(id);
-            if (!result) {
-                return res.status(500).json({ message: "Database Issue. Unable to update the problem" });
-            }
-            return res.status(200).json({ message: "Successfully update the problem " });
+        if (!old_problem.CreatedBy.equals(req.user._id)) {
+            return res.status(400).json({ message: "you are not authorized to delete this problem" });
         }
-
-        return res.status(400).json({ message: "you are not authorized to update this problem" });
-
+        const result = await Problem.findByIdAndDelete(id);
+        console.log(result);
+        if (!result) {
+            return res.status(500).json({ message: "Database Issue. Unable to delete the problem" });
+        }
+        // Delete all submissions for this problem
+        await Submission.deleteMany({ problem_id: id });
+        return res.status(200).json({ message: "Successfully deleted the problem and its submissions" });
     } catch (error) {
-        console.log(error);
         res.status(500).json({ message: "Internal Sever Issue" });
     }
 });

@@ -21,10 +21,22 @@ function SignUp() {
     const [success, setSuccess] = useState("");
     const navigate = useNavigate();
     const { setUser } = useAuth();
+    const validateUser = () => {
+        if (!firstname || firstname.trim().length < 2) return 'First name must be at least 2 characters.';
+        if (!lastname || lastname.trim().length < 2) return 'Last name must be at least 2 characters.';
+        if (!email || !/^\S+@\S+\.\S+$/.test(email)) return 'A valid email is required.';
+        if (!password || password.length < 6) return 'Password must be at least 6 characters.';
+        return '';
+    };
     const handleSubmit = async function(e){
         e.preventDefault();
         setError("");
         setSuccess("");
+        const err = validateUser();
+        if (err) {
+            setError(err);
+            return;
+        }
         try {
             const result =  await axios.post("http://localhost:3000/register",{
                 firstname : firstname,

@@ -46,6 +46,10 @@ const ContestSchema = mongoose.Schema({
             message: 'End time must be after start time.'
         }
     },
+    description: {
+        type: String,
+        default: '',
+    },
     leaderBoard : [
         {
             user_id : {
@@ -89,5 +93,16 @@ const ContestSchema = mongoose.Schema({
     ],
 });
 
+function getTimeLeft(endTime) {
+  const now = new Date();
+  const end = new Date(endTime);
+  const diff = end - now;
+  if (diff <= 0) return null;
+  const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+  const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
+  const minutes = Math.floor((diff / (1000 * 60)) % 60);
+  const seconds = Math.floor((diff / 1000) % 60);
+  return `${days}d ${hours}h ${minutes}m ${seconds}s`;
+}
 
 module.exports = mongoose.model("Contest",ContestSchema);

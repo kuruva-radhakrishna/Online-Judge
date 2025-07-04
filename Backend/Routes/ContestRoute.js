@@ -1,10 +1,11 @@
 const express = require('express');
 const router = express.Router();
-const {isLoggedIn }= require('../middleware.js');
+const {isLoggedIn, isAdmin }= require('../middleware.js');
 const Contest = require('../Models/Contests.js');
 const Problem = require('../Models/Problems.js');
 const Submission = require('../Models/Submissions.js');
-
+const axios = require('axios');
+const ContestController = require('../Controller/ContestController');
 
 router.get('/', isLoggedIn, async (req, res) => {
     //return all contests
@@ -27,14 +28,34 @@ router.get('/:id', isLoggedIn, async (req, res) => {
     try {
         const now = new Date();
         const  id  = req.params.id;
-        console.log(id);
-        const result = await Contest.findById(id);
+        const result = await Contest.findById(id)
+            .populate({
+                path: 'problems.problem_id',
+                select: 'problemName',
+            })
+            .populate({
+                path: 'leaderBoard.user_id',
+                select: 'firstname lastname email',
+            })
+            .populate({
+                path: 'leaderBoard.solvedProblems.problem_id',
+                select: 'problemName',
+            });
         if (!result) {
             return res.status(500).json({ message: "Contest not found" });
         }
         if (result.startTime >= now) {
             return res.status(400).json({ message: "The contest is not live yet" });
         }
+        // Sort problems by points ascending
+        result.problems.sort((a, b) => a.points - b.points);
+        // Sort leaderboard by points descending, then lastSubmission ascending
+        result.leaderBoard.sort((a, b) => {
+            if (b.points !== a.points) return b.points - a.points;
+            if (!a.lastSubmission) return 1;
+            if (!b.lastSubmission) return -1;
+            return new Date(a.lastSubmission) - new Date(b.lastSubmission);
+        });
         return res.status(200).json(result);
     } catch (error) {
         res.status(500).json({ message: "Internal Sever Issue" });
@@ -44,48 +65,65 @@ router.get('/:id', isLoggedIn, async (req, res) => {
 router.post('/submission/:contest_id/:problem_id', isLoggedIn, async (req, res) => {
     try {
         const { contest_id, problem_id } = req.params;
-        const newSubmission = req.body.submission;
+        const { code, language } = req.body.submission;
+        // Build submission object first
+        const newSubmission = {
+            user_id: req.user._id,
+            problem_id,
+            contest_id,
+            code,
+            language,
+            isInContest: true,
+        };
+        // Check contest and problem validity
         const contest = await Contest.findById(contest_id);
         const problem = await Problem.findById(problem_id);
         if (!contest || !problem) {
             return res.status(400).json({ message: "Contest or problem doesn't exist" });
         }
-
         const now = new Date();
-
-        // Contest should be active
         if (now < contest.startTime || now > contest.endTime) {
             return res.status(403).json({ message: "Contest is not active" });
         }
-
-        // Check if the problem exists in the contest
         const problemEntry = contest.problems.find(p =>
             p.problem_id.toString() === problem_id.toString()
         );
         if (!problemEntry) {
             return res.status(400).json({ message: "Problem is not part of this contest" });
         }
-
-        // Attach necessary submission details
-        newSubmission.user_id = req.user._id;
-        newSubmission.problem_id = problem_id;
-        newSubmission.contest_id = contest_id;
-        newSubmission.time = now;
-
+        // Run code against all test cases
+        const verdicts = [];
+        for (const tc of problem.TestCases) {
+            const result = await axios.post("http://localhost:8000/run", {
+                code,
+                language,
+                input: tc.input,
+            });
+            const output = result.data.output?.output;
+            if (output !== undefined) {
+                if (output.trim() === tc.output.trim()) {
+                    verdicts.push('Accepted');
+                } else {
+                    verdicts.push('Wrong Answer');
+                    break;
+                }
+            } else {
+                verdicts.push(result.data.errorType || 'Runtime Error');
+                break;
+            }
+        }
+        const n = verdicts.length;
+        newSubmission.verdict = verdicts[n - 1] || 'Unknown';
+        // Save submission only after all checks and verdict assignment
         const result = await Submission.create(newSubmission);
         if (!result) {
             return res.status(500).json({ message: "Unable to upload submission" });
         }
-
         // Update leaderboard only if the verdict is accepted
         if (newSubmission.verdict === 'Accepted') {
-            console.log('accepted');
             const userIdStr = req.user._id.toString();
             const userEntry = contest.leaderBoard.find(entry => entry.user_id.toString() === userIdStr);
-            console.log(userEntry);
             if (!userEntry) {
-                // First time submission by user in this contest
-                console.log('Pushing user');
                 await Contest.findByIdAndUpdate(contest_id, {
                     $push: {
                         leaderBoard: {
@@ -99,10 +137,8 @@ router.post('/submission/:contest_id/:problem_id', isLoggedIn, async (req, res) 
             } else {
                 const hasSolved = userEntry.solvedProblems.some(
                     pidObj => pidObj.problem_id.toString() === problem_id.toString()
-                    );
-
+                );
                 if (!hasSolved) {
-                    // First time solving this problem
                     await Contest.updateOne(
                         {
                             _id: contest_id,
@@ -115,8 +151,6 @@ router.post('/submission/:contest_id/:problem_id', isLoggedIn, async (req, res) 
                         }
                     );
                 } else {
-                    // Already solved — update only lastSubmission
-                    console.log('Already Solved');
                     await Contest.updateOne(
                         {
                             _id: contest_id,
@@ -129,8 +163,7 @@ router.post('/submission/:contest_id/:problem_id', isLoggedIn, async (req, res) 
                 }
             }
         }
-
-        return res.status(201).json({ message: "Submission uploaded successfully" });
+        return res.status(200).json(verdicts);
     } catch (error) {
         console.error(error);
         return res.status(500).json({ message: "Internal Server Error" });
@@ -139,17 +172,59 @@ router.post('/submission/:contest_id/:problem_id', isLoggedIn, async (req, res) 
 
 router.get('/:id/leaderboard', isLoggedIn, async (req, res) => {
     try {
-        const { id } = req.params.body;
-        const contest = await Contest.findById(id);
+        const { id } = req.params;
+        const contest = await Contest.findById(id)
+            .populate({
+                path: 'leaderBoard.user_id',
+                select: 'firstname lastname email',
+            })
+            .populate({
+                path: 'leaderBoard.solvedProblems.problem_id',
+                select: 'problemName',
+            });
         if (!contest) {
-            res.status(400).json({ message: "This contest doesn't exist" });
+            return res.status(400).json({ message: "This contest doesn't exist" });
         }
-
-        res.status(200).json(contest.leaderboard);
+        // Sort leaderboard by points descending, then lastSubmission ascending
+        const leaderboard = [...contest.leaderBoard].sort((a, b) => {
+            if (b.points !== a.points) return b.points - a.points;
+            if (!a.lastSubmission) return 1;
+            if (!b.lastSubmission) return -1;
+            return new Date(a.lastSubmission) - new Date(b.lastSubmission);
+        });
+        res.status(200).json(leaderboard);
     } catch (error) {
         res.status(500).json({ message: "Internal Sever Issue" });
     }
 });
 
+router.post('/new', isLoggedIn, isAdmin, async (req, res) => {
+    try {
+        const { contestTitle, startTime, endTime, problems, description } = req.body;
+        if (!contestTitle || !startTime || !endTime || !problems || problems.length < 3) {
+            return res.status(400).json({ message: 'All fields are required and at least 3 problems must be selected.' });
+        }
+        const contest = new Contest({
+            contestTitle,
+            createdBy: req.user._id,
+            startTime,
+            endTime,
+            problems,
+            description: description || '',
+        });
+        await contest.save();
+        res.status(201).json(contest);
+    } catch (error) {
+        console.error('Error creating contest:', error);
+        res.status(500).json({ message: 'Failed to create contest.' });
+    }
+});
 
-module.exports.ContestRoute = router;
+router.post('/', ContestController.createContest);
+router.get('/', ContestController.getAllContests);
+router.get('/:id', ContestController.getContestById);
+router.get('/:id/problems', ContestController.getContestProblems);
+router.get('/:id/leaderboard', ContestController.getContestLeaderboard);
+router.post('/:id/leaderboard', ContestController.addToLeaderboard);
+
+module.exports = router;

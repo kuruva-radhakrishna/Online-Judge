@@ -1,4 +1,4 @@
-import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
+import { Routes, Route, Navigate, useLocation, useParams } from 'react-router-dom';
 import SignUp from './components/Auth/SignUp';
 import Login from './components/Auth/Login';
 import Problems from './components/Problems/Problems';
@@ -18,6 +18,10 @@ import Profile from './components/Profile';
 import Home from './components/Home';
 import NewProblem from './components/Problems/NewProblem';
 import EditProblem from './components/Problems/EditProblem';
+import NewContest from './components/Contests/NewContest';
+import ContestProblemView from './components/Contests/ContestProblemView';
+import ContestProblemDescription from './components/Contests/ContestProblemDescription';
+import ContestProblemSubmissions from './components/Contests/ContestProblemSubmissions';
 
 function ProtectedRoute({ children }) {
   const { user, loading } = useAuth();
@@ -66,10 +70,30 @@ function AppRoutes() {
           </Route>
           <Route path="/submission/:id" element={<SubmissionCodeView />} />
           <Route path='/profile' element = {<Profile />} />
+          <Route path='/contests/:id' element={<ContestViewWrapper />} />
+          <Route path="/contests/:contestId/problem/:problemId/*" element={
+            <ProtectedRoute>
+              <ContestProblemView />
+            </ProtectedRoute>
+          }>
+            <Route path="description" element={<ContestProblemDescription />} />
+            <Route path="submissions" element={<ContestProblemSubmissions />} />
+          </Route>
+          <Route path="/problem/:problemId/*" element={
+            <ProtectedRoute>
+              <Problem />
+            </ProtectedRoute>
+          } />
+          <Route path="/contests/new" element={<NewContest />} />
         </Routes>
       </div>
     </>
   );
+}
+
+function ContestViewWrapper() {
+  const { id } = useParams();
+  return <ContestView contestId={id} />;
 }
 
 export default AppRoutes; 

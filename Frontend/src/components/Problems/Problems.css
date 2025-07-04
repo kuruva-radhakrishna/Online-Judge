@@ -1,5 +1,5 @@
 .problems {
-  max-width: 900px;
+  max-width: 1000px;
   margin: 40px auto;
   padding: 24px;
   background: #fff;
@@ -18,6 +18,7 @@
 .problems th, .problems td {
   padding: 14px 16px;
   text-align: left;
+  vertical-align: middle;
 }
 
 .problems th {
@@ -47,6 +48,7 @@
   text-decoration: none;
   font-weight: 500;
   transition: color 0.18s;
+  font-size: 0.9rem;
 }
 
 .problems a:hover {
@@ -62,6 +64,76 @@
   }
   .problems th, .problems td {
     padding: 8px 6px;
-    font-size: 0.97rem;
+    font-size: 0.75rem;
   }
+}
+
+.difficulty-box {
+  display: inline-block;
+  padding: 5px 18px;
+  border-radius: 16px;
+  font-weight: 500;
+  font-size: 0.75rem;
+  color: #fff;
+  letter-spacing: 0.02em;
+  text-transform: capitalize;
+  margin-right: 2px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+}
+.difficulty-box.easy {
+  background: #a5d6a7;
+  color: #222;
+}
+.difficulty-box.medium {
+  background: #ffe082;
+  color: #b26a00;
+}
+.difficulty-box.difficult {
+  background: #fc5757;
+  color: #fff;
+}
+
+.topic-tag {
+  display: inline-block;
+  background: #f5f7fa;
+  color: #1976d2;
+  border-radius: 12px;
+  padding: 3px 12px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  margin: 2px 4px 2px 0;
+  letter-spacing: 0.01em;
+  box-shadow: 0 1px 4px rgba(25,118,210,0.06);
+  border: 1px solid #e3eafc;
+  transition: background 0.18s, color 0.18s;
+}
+
+/* Fix PrismJS comment rendering in code editor */
+.prism-code, .prism-code * {
+  line-height: 1.6 !important;
+  font-family: 'Fira Mono', 'Consolas', monospace !important;
+  font-size: 1rem !important;
+  position: static !important;
+}
+.token.comment, .token.prolog, .token.doctype, .token.cdata {
+  color: #6a9955 !important;
+  font-style: italic;
+  position: static !important;
+  background: none !important;
+}
+
+.problem-name-cell {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.solved-problem-link {
+  font-weight: 700;
+  color: #43a047 !important;
+}
+.solved-tick {
+  color: #43a047;
+  font-size: 1em;
+  margin-left: 2px;
+  line-height: 1;
 } 

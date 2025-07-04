@@ -19,7 +19,11 @@ const UserSchema = new mongoose.Schema({
         type : String,
         enum : ["user","admin"] ,
         default : "user",
-    }
+    },
+    contests: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Contest',
+    }]
 })
 
 UserSchema.plugin(passportLocalMongoose, { usernameField: 'email' });

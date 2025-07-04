@@ -18,6 +18,7 @@ function EditProblem() {
   const [message, setMessage] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [fetching, setFetching] = useState(true);
+  const [aiLoading, setAiLoading] = useState(false);
 
   useEffect(() => {
     const fetchProblem = async () => {
@@ -47,6 +48,43 @@ function EditProblem() {
   const addTestCase = () => setTestCases(tc => [...tc, { input: '', output: '', isPublic: true }]);
   const removeTestCase = idx => setTestCases(tc => tc.filter((_, i) => i !== idx));
 
+  const handleAI = async () => {
+    setMessage('');
+    setAiLoading(true);
+    try {
+      const result = await axios.post('http://localhost:3000/ai/createProblem', {
+        problem: {
+          problemName,
+          problemDescription,
+          Constraints: constraints.split('\n').map(s => s.trim()).filter(Boolean),
+          TestCases: testCases,
+          difficulty,
+          topics: topics.split(',').map(t => t.trim()).filter(Boolean)
+        }
+      }, { withCredentials: true });
+
+      const prob = result.data.problem;
+      if (prob) {
+        setProblemName(prob.problemName || problemName);
+        setProblemDescription(prob.problemDescription || problemDescription);
+        setConstraints((prob.Constraints || []).join('\n'));
+        setTopics((prob.topics || []).join(', '));
+        setDifficulty(prob.difficulty || difficulty);
+        if (prob.TestCases && Array.isArray(prob.TestCases)) {
+          setTestCases(prob.TestCases);
+        }
+        setMessage('AI completed the problem!');
+      } else {
+        setMessage('AI did not return a valid problem.');
+        console.error('AI response missing problem object:', result.data);
+      }
+    } catch (error) {
+      setMessage('AI completion failed.');
+      console.error('AI completion error:', error);
+    }
+    setAiLoading(false);
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setSubmitting(true);
@@ -72,7 +110,36 @@ function EditProblem() {
 
   return (
     <div className="new-problem-container">
-      <h2>Edit Problem</h2>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 8 }}>
+        <h2 style={{ margin: 0 }}>Edit Problem</h2>
+        <button
+          onClick={handleAI}
+          disabled={aiLoading}
+          style={{
+            background: aiLoading ? '#e0e0e0' : '#1976d2',
+            color: aiLoading ? '#888' : '#fff',
+            border: 'none',
+            borderRadius: 7,
+            padding: '8px 18px',
+            fontWeight: 600,
+            fontSize: '1rem',
+            cursor: aiLoading ? 'not-allowed' : 'pointer',
+            transition: 'background 0.18s, color 0.18s',
+            minWidth: 120
+          }}
+        >
+          {aiLoading ? 'Completing...' : 'AI completion'}
+        </button>
+      </div>
+      {message && (
+        <div style={{
+          marginBottom: 16,
+          color: message.includes('completed') ? 'green' : 'red',
+          fontWeight: 600,
+          fontSize: '1.1rem',
+          minHeight: 24
+        }}>{message}</div>
+      )}
       <form onSubmit={handleSubmit} className="new-problem-form" style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
         <label>Problem Name
           <input type="text" value={problemName} onChange={e => setProblemName(e.target.value)} required />

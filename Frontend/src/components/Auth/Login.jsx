@@ -26,7 +26,6 @@ function Login() {
             }, {
                 withCredentials: true
             });
-            console.log(result.data.user);
             setUser(result.data.user);
             setSuccess("Problems loaded successfully!");
             navigate('/problems');

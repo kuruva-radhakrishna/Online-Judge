@@ -59,6 +59,48 @@
   border-bottom: none;
 }
 
+.contest-title-link {
+  color: #2d3a8c;
+  font-weight: 600;
+  font-size: 1.08rem;
+  text-decoration: none;
+  padding: 6px 16px;
+  border-radius: 6px;
+  transition: background 0.18s, color 0.18s, box-shadow 0.18s;
+  background: #f3f6fd;
+  box-shadow: 0 1px 4px rgba(45,58,140,0.04);
+  display: inline-block;
+}
+
+.contest-title-link:hover, .contest-title-link:focus {
+  background: #2d3a8c;
+  color: #fff;
+  text-decoration: none;
+  box-shadow: 0 2px 8px rgba(45,58,140,0.10);
+}
+
+.create-contest-btn {
+  background: #1976d2;
+  color: #fff;
+  font-weight: 600;
+  padding: 10px 22px;
+  border-radius: 8px;
+  text-decoration: none;
+  font-size: 1.08rem;
+  box-shadow: 0 2px 8px rgba(25, 118, 210, 0.08);
+  transition: background 0.18s, box-shadow 0.18s;
+  border: none;
+  outline: none;
+  display: inline-block;
+}
+
+.create-contest-btn:hover, .create-contest-btn:focus {
+  background: #1251a3;
+  color: #fff;
+  box-shadow: 0 4px 16px rgba(25, 118, 210, 0.13);
+  text-decoration: none;
+}
+
 @media (max-width: 900px) {
   .contest-category {
     max-width: 100%;

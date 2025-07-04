@@ -11,14 +11,14 @@ const passport = require("passport");
 const session = require("express-session");
 
 const User = require("./Models/user.js");
-const { UserRoute } = require("./Routes/UserRoute.js");
-const { ProblemRoute } = require("./Routes/ProblemRoute.js");
-const { SubmissionRoute } = require("./Routes/SubmissionRoute.js");
-const { ContestRoute } = require("./Routes/ContestRoute.js");
-const { AdminRoute } = require("./Routes/AdminRoute.js");
+const UserRoute = require("./Routes/UserRoute.js");
+const ProblemRoute = require("./Routes/ProblemRoute.js");
+const {SubmissionRouter} = require("./Routes/SubmissionRoute.js");
+const ContestRoute = require("./Routes/ContestRoute.js");
+const AdminRoute = require("./Routes/AdminRoute.js");
+const AIRoute = require("./Routes/AIRoute.js");
 
 const cors = require("cors");
-const { AIRoute } = require("./Routes/AIRoute.js");
 
 app.use(cors({
   origin: 'http://localhost:5173', // ✅ must match your frontend
@@ -70,7 +70,7 @@ app.use('/ai',AIRoute);
 
 app.use("/problems", ProblemRoute);
 
-app.use("/submissions", SubmissionRoute);
+app.use("/submissions", SubmissionRouter);
 
 app.use("/contests", ContestRoute);
 

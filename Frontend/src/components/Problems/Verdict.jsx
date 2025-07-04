@@ -1,8 +1,14 @@
 function getColor(verdict) {
-  if (!verdict) return '#888';
+  if (!verdict) {
+    return '#888';
+  }
   const v = verdict.toLowerCase();
-  if (v.includes('accept')) return '#2e7d32'; // green
-  if (v.includes('wrong') || v.includes('error') || v.includes('runtime')) return '#d32f2f'; // red
+  if (v.includes('accept')) {
+    return '#2e7d32'; // green
+  }
+  if (v.includes('wrong') || v.includes('error') || v.includes('runtime')) {
+    return '#d32f2f'; // red
+  }
   return '#ffa116'; // yellow/orange
 }
 

@@ -122,4 +122,4 @@ router.get('/single/:id', async (req, res) => {
     }
 });
 
-module.exports.SubmissionRoute = router;
+module.exports.SubmissionRouter = router;

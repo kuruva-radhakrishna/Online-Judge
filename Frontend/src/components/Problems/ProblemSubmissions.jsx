@@ -27,7 +27,6 @@ function ProblemSubmissions({ submissions, refreshSubmissions }) {
                     </tr>
                 </thead>
                 <tbody>
-                    {console.log(submissions)}
                     {submissions && submissions.length > 0 ? (
                         submissions.map((submission, index) => (
                             <tr key={submission._id}>

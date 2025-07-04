@@ -36,7 +36,10 @@ function Nav() {
             <Button color="inherit" component={Link} to="/problems" className="nav-link">Problems</Button>
             <Button color="inherit" component={Link} to="/contests" className="nav-link">Contests</Button>
             {user.role === 'admin' && (
-              <Button color="inherit" component={Link} to="/problems/new" className="nav-link">Create New Problem</Button>
+              <>
+                <Button color="inherit" component={Link} to="/problems/new" className="nav-link">Create New Problem</Button>
+                <Button color="inherit" component={Link} to="/contests/new" className="nav-link">Create Contest</Button>
+              </>
             )}
             <Link to="/profile" className="nav-link nav-profile-circle">
               {user?.firstname?.[0]?.toUpperCase()}{user?.lastname?.[0]?.toUpperCase() || (!user?.firstname && 'U')}

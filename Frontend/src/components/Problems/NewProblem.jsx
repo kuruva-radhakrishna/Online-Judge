@@ -139,16 +139,24 @@ function NewProblem() {
           <input type="text" value={topics} onChange={e => setTopics(e.target.value)} />
         </label>
         <label>Difficulty
-          <select value={difficulty} onChange={e => setDifficulty(e.target.value)} required>
-            <option value="easy">Easy</option>
-            <option value="medium">Medium</option>
-            <option value="difficult">Difficult</option>
-          </select>
+          <div className="difficulty-pill-group">
+            {['easy', 'medium', 'difficult'].map((level) => (
+              <button
+                type="button"
+                key={level}
+                className={`difficulty-pill${difficulty === level ? ' selected' : ''}${level !== 'easy' ? ' ' + level : ''}`}
+                onClick={() => setDifficulty(level)}
+                aria-pressed={difficulty === level}
+              >
+                {level.charAt(0).toUpperCase() + level.slice(1)}
+              </button>
+            ))}
+          </div>
         </label>
         <div>
           <b>Test Cases</b>
           {testCases.map((tc, idx) => (
-            <div key={idx} style={{ border: '1px solid #ddd', padding: 8, marginBottom: 8, borderRadius: 6 }}>
+            <div key={idx} className="test-case-block">
               <label>Input
                 <textarea value={tc.input} onChange={e => handleTestCaseChange(idx, 'input', e.target.value)} rows={2} required />
               </label>
@@ -158,10 +166,10 @@ function NewProblem() {
               <label>Is Public?
                 <input type="checkbox" checked={tc.isPublic} onChange={e => handleTestCaseChange(idx, 'isPublic', e.target.checked)} />
               </label>
-              {testCases.length > 1 && <button type="button" onClick={() => removeTestCase(idx)}>Remove</button>}
+              {testCases.length > 1 && <button type="button" className="remove-btn" onClick={() => removeTestCase(idx)}>Remove</button>}
             </div>
           ))}
-          <button type="button" onClick={addTestCase}>Add Test Case</button>
+          <button type="button" className="add-test-case-btn" onClick={addTestCase}>Add Test Case</button>
         </div>
         <button type="submit" disabled={submitting}>{submitting ? 'Submitting...' : 'Create Problem'}</button>
       </form>

@@ -1,12 +1,14 @@
 import axios from "axios";
 import { useState, useEffect } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, Link } from "react-router-dom";
 import "./Contests.css";
+import { useAuth } from "../../contexts/AuthContext";
 
 function Contests() {
     const [contests, setContests] = useState([]);
     const [now, setNow] = useState(new Date());
     const { id } = useParams();
+    const { user } = useAuth();
 
     useEffect(() => {
         const fetchData = async () => {
@@ -16,7 +18,6 @@ function Contests() {
                 });
                 setContests(result.data);
             } catch (error) {
-                console.log(error);
             }
         };
         fetchData();
@@ -89,11 +90,9 @@ function Contests() {
     });
 
     const renderTable = (data, label) => (
-        <div className="contest-category">
-            <h2>{label}</h2>
-            {data.length === 0 ? (
-                <div className="no-contests">No contests in {label.toLowerCase()}.</div>
-            ) : (
+        data.length === 0 ? null : (
+            <div className="contest-category">
+                <h2>{label}</h2>
                 <table>
                     <thead>
                         <tr>
@@ -112,7 +111,9 @@ function Contests() {
                             return (
                                 <tr key={contest._id || index}>
                                     <td>{index + 1}</td>
-                                    <td>{contest.contestTitle}</td>
+                                    <td>
+                                        <Link to={`/contests/${contest._id}`} className="contest-title-link">{contest.contestTitle}</Link>
+                                    </td>
                                     <td>{date} at {time}</td>
                                     <td>{duration}</td>
                                     <td>
@@ -123,15 +124,28 @@ function Contests() {
                         })}
                     </tbody>
                 </table>
-            )}
-        </div>
+            </div>
+        )
     );
+
+    const noContests = present.length === 0 && future.length === 0 && past.length === 0;
 
     return (
         <div className="contest-view">
-            {renderTable(present, "Ongoing Contests")}
-            {renderTable(future, "Upcoming Contests")}
-            {renderTable(past, "Past Contests")}
+            {user && user.role === 'admin' && (
+                <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 24 }}>
+                    <Link to="/contests/new" className="create-contest-btn">Create Contest</Link>
+                </div>
+            )}
+            {noContests ? (
+                <div className="no-contests">No contests found.</div>
+            ) : (
+                <>
+                    {renderTable(present, "Ongoing Contests")}
+                    {renderTable(future, "Upcoming Contests")}
+                    {renderTable(past, "Past Contests")}
+                </>
+            )}
         </div>
     );
 }

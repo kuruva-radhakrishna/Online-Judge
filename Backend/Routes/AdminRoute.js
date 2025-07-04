@@ -4,13 +4,19 @@ const {isLoggedIn ,isAdmin}= require('../middleware.js');
 const Contest = require('../Models/Contests.js');
 const Problem = require('../Models/Problems.js');
 const Submission = require('../Models/Submissions.js');
+const AdminController = require('../Controller/AdminController');
+const { validateProblem } = require('../validators/ProblemValidation');
+
+router.get('/users', AdminController.getAllUsers);
+router.delete('/users/:id', AdminController.deleteUser);
+router.get('/problems', AdminController.getAllProblems);
+router.delete('/problems/:id', AdminController.deleteProblem);
+router.get('/contests', AdminController.getAllContests);
+router.delete('/contests/:id', AdminController.deleteContest);
 
 router.get('/problems/', isLoggedIn, isAdmin, async (req, res) => {
     try {
-        console.log(req.user);
-        console.log("Logged-in user ID:", req.user._id.toString());
         const allProblems = await Problem.find({});
-        console.log(allProblems);
         const problemsByUser = await Problem.find({ CreatedBy: req.user._id });
         return res.status(200).json(problemsByUser);
     } catch (err) {
@@ -69,7 +75,6 @@ router.delete('/problems/:id', isLoggedIn, isAdmin, async (req, res) => {
             return res.status(400).json({ message: "you are not authorized to delete this problem" });
         }
         const result = await Problem.findByIdAndDelete(id);
-        console.log(result);
         if (!result) {
             return res.status(500).json({ message: "Database Issue. Unable to delete the problem" });
         }
@@ -81,22 +86,29 @@ router.delete('/problems/:id', isLoggedIn, isAdmin, async (req, res) => {
     }
 });
 
+// Route to get contests created by the current admin user
+router.get('/contests/created-by-me', isLoggedIn, isAdmin, async (req, res) => {
+    try {
+        const contests = await Contest.find({ createdBy: req.user._id });
+        res.status(200).json(contests);
+    } catch (error) {
+        res.status(500).json({ message: 'Failed to fetch contests created by user.' });
+    }
+});
+
 
 router.post('/contest/new', isLoggedIn, isAdmin, async (req, res) => {
     //check user is admin or not
     //create new contest
 
     try {
-        console.log(req.body.contest);
         const newContest = req.body.contest;
-        console.log(newContest);
         const result = await Contest.create(newContest);
         if (!result) {
             return res.status(500).json({ message: "Database error. Unable to create contest" });
         }
         return res.status(200).json({ message: "Contest Created Successfully" });
     } catch (error) {
-        console.log(error);
         res.status(500).json({ message: "Internal Sever Issue" });
     }
 });
@@ -127,29 +139,24 @@ router.patch('/contest/:id/update', isLoggedIn, isAdmin, async (req, res) => {
 })
 
 router.delete('/contests/:id', isLoggedIn, isAdmin, async (req, res) => {
-    // Delete the contest
-    //check if there are submissions for this contest and update them to null
-
     try {
-        const { id } = req.params.body;
+        const { id } = req.params;
+        // Only allow deletion if the contest was created by the current user
         const contest = await Contest.findById(id);
-        const now = new Date();
-        if (old_problem.createdBy.toString() != req.user_id.toString()) {
-            return res.status(400).json({ message: "you are not authorized to update this contest" });
+        if (!contest) {
+            return res.status(404).json({ message: 'Contest not found.' });
         }
-        if (contest.startTime >= now) {
-            return res.status(400).json({ message: "you are cannot delete this contest now" });
+        if (contest.createdBy.toString() !== req.user._id.toString()) {
+            return res.status(403).json({ message: 'You are not authorized to delete this contest.' });
         }
-        const result = Problem.findByIdAndUpdate({ _id: id }, { $set: req.body.problem });
-        if (!result) {
-            return res.status(500).json({ message: "Database Issue. Unable to update the contest" });
-        }
-        return res.status(200).json({ message: "Successfully update the contest " });
+        // Delete the contest
+        await Contest.findByIdAndDelete(id);
+        // Set contest_id to null for all submissions belonging to this contest
+        await Submission.updateMany({ contest_id: id }, { $set: { contest_id: null } });
+        return res.status(200).json({ message: 'Contest deleted and related submissions updated.' });
     } catch (error) {
-        return res.status(500).json({ message: "Internal Sever Issue" });
+        res.status(500).json({ message: 'Failed to delete contest.' });
     }
-})
+});
 
-
-
-module.exports.AdminRoute = router;
+module.exports = router;

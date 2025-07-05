@@ -1,0 +1,94 @@
+.problem-filters-container {
+  margin-bottom: 24px;
+}
+
+.problem-topic-bar {
+  display: flex;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  gap: 12px;
+  padding-bottom: 8px;
+  margin-bottom: 12px;
+  scrollbar-width: none;
+}
+
+.topic-pill {
+  display: flex;
+  align-items: center;
+  background: #f5f7fa;
+  color: #222;
+  border: 1.5px solid #e0e0e0;
+  border-radius: 999px;
+  padding: 8px 22px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s, border 0.15s;
+  outline: none;
+  gap: 8px;
+  height: 36px;
+}
+.topic-pill .topic-badge {
+  background: #e0e0e0;
+  color: #555;
+  border-radius: 12px;
+  font-size: 0.85em;
+  padding: 2px 8px;
+  margin-left: 8px;
+  font-weight: 600;
+}
+.topic-pill.active, .topic-pill:focus, .topic-pill:hover {
+  background: #ffa116;
+  color: #fff;
+  border: 1.5px solid #ffa116;
+}
+.topic-pill.active .topic-badge, .topic-pill:focus .topic-badge, .topic-pill:hover .topic-badge {
+  background: #fff;
+  color: #ffa116;
+}
+.topic-pill svg {
+  color: inherit;
+  font-size: 1.1em;
+}
+
+.problem-difficulty-bar {
+  display: flex;
+  gap: 14px;
+  margin-bottom: 4px;
+}
+.difficulty-pill {
+  display: flex;
+  align-items: center;
+  background: #f5f7fa;
+  color: #222;
+  border: 1.5px solid #e0e0e0;
+  border-radius: 999px;
+  padding: 8px 22px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s, border 0.15s;
+  outline: none;
+  gap: 8px;
+  height: 40px;
+}
+.difficulty-pill.active, .difficulty-pill:focus, .difficulty-pill:hover {
+  background: #ffa116;
+  color: #fff;
+  border: 1.5px solid #ffa116;
+}
+.difficulty-pill svg {
+  color: inherit;
+  font-size: 1.1em;
+}
+
+/* Light mode support (already light by default) */
+
+/* Hide scroll bar but allow scroll */
+.problem-topic-bar::-webkit-scrollbar {
+  display: none;
+}
+.problem-topic-bar::-webkit-scrollbar-thumb {
+  background: #e0e0e0;
+  border-radius: 6px;
+} 

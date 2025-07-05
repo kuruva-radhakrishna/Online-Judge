@@ -7,156 +7,22 @@ const Submission = require('../Models/Submissions.js');
 const AdminController = require('../Controller/AdminController');
 const { validateProblem } = require('../validators/ProblemValidation');
 
-router.get('/users', AdminController.getAllUsers);
-router.delete('/users/:id', AdminController.deleteUser);
-router.get('/problems', AdminController.getAllProblems);
-router.delete('/problems/:id', AdminController.deleteProblem);
-router.get('/contests', AdminController.getAllContests);
-router.delete('/contests/:id', AdminController.deleteContest);
+router.get('/problems/', isLoggedIn, isAdmin, AdminController.problemsCreatedByUser);
 
-router.get('/problems/', isLoggedIn, isAdmin, async (req, res) => {
-    try {
-        const allProblems = await Problem.find({});
-        const problemsByUser = await Problem.find({ CreatedBy: req.user._id });
-        return res.status(200).json(problemsByUser);
-    } catch (err) {
-        res.status(500).json({ message: "Internal Server Error" });
-    }
-})
+router.post('/problems/new', isLoggedIn, isAdmin, AdminController.createProblem);
 
-router.post('/problems/new', isLoggedIn, isAdmin, async (req, res) => {
-    //Create New problem
-    //Check the user's role only create if the user is admin
+router.patch('/problems/:id/update', isLoggedIn, isAdmin, AdminController.updateProblem);
 
-    try {
-        const newProblem = req.body.problem;
-        newProblem.CreatedBy = req.user._id;
-        const result = await Problem.create(newProblem);
-        if (!result) {
-            return res.status('500').json('Database Issue');
-        }
-        else {
-            return res.status('200').json({ message: 'Successfully Created new Problem' });
-        }
-    } catch (error) {
-        res.status(500).json({ message: "Internal Server Error" });
-    }
-});
-
-router.patch('/problems/:id/update', isLoggedIn, isAdmin, async (req, res) => {
-    //update the problem
-    //Update only when the user's role is admin and the problem is created by same admin
-    try {
-        const id = req.params.id;
-        const old_problem = await Problem.findById(id);
-        if (!old_problem.CreatedBy.equals(req.user._id)) {
-            return res.status(400).json({ message: "you are not authorized to update this problem" });
-        }
-        const result = await Problem.findByIdAndUpdate({ _id: id }, { $set: req.body.problem });
-        if (!result) {
-            return res.status(500).json({ message: "Database Issue. Unable to update the problem" });
-        }
-        res.status(200).json({ message: "Successfully updated the problem" });
-    } catch (error) {
-        res.status(500).json({ message: "Internal Sever Issue" });
-    }
-});
-
-router.delete('/problems/:id', isLoggedIn, isAdmin, async (req, res) => {
-    // Delete the problem with the id
-    //Delete the submissions made on the problem or make the problem id for submissions as null
-    // Change the problem array if the problem is present in any contest make it null 
-
-    try {
-        const {id} = req.params;
-        const old_problem = await Problem.findById(id);
-
-        if (!old_problem.CreatedBy.equals(req.user._id)) {
-            return res.status(400).json({ message: "you are not authorized to delete this problem" });
-        }
-        const result = await Problem.findByIdAndDelete(id);
-        if (!result) {
-            return res.status(500).json({ message: "Database Issue. Unable to delete the problem" });
-        }
-        // Delete all submissions for this problem
-        await Submission.deleteMany({ problem_id: id });
-        return res.status(200).json({ message: "Successfully deleted the problem and its submissions" });
-    } catch (error) {
-        res.status(500).json({ message: "Internal Sever Issue" });
-    }
-});
+router.delete('/problems/:id', isLoggedIn, isAdmin, AdminController.deleteProblem);
 
 // Route to get contests created by the current admin user
-router.get('/contests/created-by-me', isLoggedIn, isAdmin, async (req, res) => {
-    try {
-        const contests = await Contest.find({ createdBy: req.user._id });
-        res.status(200).json(contests);
-    } catch (error) {
-        res.status(500).json({ message: 'Failed to fetch contests created by user.' });
-    }
-});
+router.get('/contests/created-by-me', isLoggedIn, isAdmin, AdminController.contestsByUser);
 
 
-router.post('/contest/new', isLoggedIn, isAdmin, async (req, res) => {
-    //check user is admin or not
-    //create new contest
+router.post('/contest/new', isLoggedIn, isAdmin, AdminController.createContest);
 
-    try {
-        const newContest = req.body.contest;
-        const result = await Contest.create(newContest);
-        if (!result) {
-            return res.status(500).json({ message: "Database error. Unable to create contest" });
-        }
-        return res.status(200).json({ message: "Contest Created Successfully" });
-    } catch (error) {
-        res.status(500).json({ message: "Internal Sever Issue" });
-    }
-});
+router.patch('/contest/:id/update', isLoggedIn, isAdmin, AdminController.updateContest)
 
-router.patch('/contest/:id/update', isLoggedIn, isAdmin, async (req, res) => {
-    // check if the contest is pending
-    // update only pending contests
-
-    try {
-        const now = new Date()
-        const { id } = req.params.body;
-        const old_contest = await Contest.findById(id);
-        if (old_contest.createdBy.toString() != req.user_id.toString()) {
-            return res.status(400).json({ message: "you are not authorized to update this contest" });
-        }
-        const result = await Problem.findByIdAndUpdate({ _id: id }, { $set: req.body.contest });
-        if (!result) {
-            return res.status(500).json({ message: "Database Issue. Unable to update the contest" });
-        }
-
-        if (old_contest.startTime >= now) {
-            return res.status(400).json({ message: "you are cannot update this contest now" });
-        }
-        return res.status(200).json({ message: "Successfully update the contest " });
-    } catch (error) {
-        return res.status(500).json({ message: "Internal Sever Issue" });
-    }
-})
-
-router.delete('/contests/:id', isLoggedIn, isAdmin, async (req, res) => {
-    try {
-        const { id } = req.params;
-        // Only allow deletion if the contest was created by the current user
-        const contest = await Contest.findById(id);
-        if (!contest) {
-            return res.status(404).json({ message: 'Contest not found.' });
-        }
-        if (contest.createdBy.toString() !== req.user._id.toString()) {
-            return res.status(403).json({ message: 'You are not authorized to delete this contest.' });
-        }
-        // Delete the contest
-        await Contest.findByIdAndDelete(id);
-        // Set contest_id to null for all submissions belonging to this contest
-        await Submission.updateMany({ contest_id: id }, { $set: { contest_id: null } });
-        return res.status(200).json({ message: 'Contest deleted and related submissions updated.' });
-    } catch (error) {
-        res.status(500).json({ message: 'Failed to delete contest.' });
-    }
-});
+router.delete('/contests/:id', isLoggedIn, isAdmin,AdminController.deleteContest);
 
 module.exports = router;

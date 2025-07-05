@@ -71,6 +71,11 @@
   max-width: 260px;
   flex: 1 1 220px;
   text-align: center;
+  transition: box-shadow 0.18s, transform 0.18s;
+}
+.oj-feature-card:hover {
+  box-shadow: 0 8px 24px rgba(255,161,22,0.13);
+  transform: translateY(-4px) scale(1.03);
 }
 .oj-feature-card h2 {
   color: #ffa116;
@@ -93,6 +98,183 @@
   margin-bottom: 18px;
 }
 
+@media (max-width: 900px) {
+  .oj-features {
+    flex-direction: column;
+    align-items: center;
+  }
+  .oj-feature-card {
+    max-width: 100%;
+    width: 100%;
+  }
+}
+
+.oj-hero-modern {
+  position: relative;
+  min-height: 340px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 56px;
+  overflow: hidden;
+}
+.oj-hero-bg-gradient {
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: linear-gradient(120deg, #1976d2 0%, #ffa116 100%);
+  opacity: 0.13;
+  z-index: 0;
+}
+.oj-hero-content {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  text-align: center;
+  padding: 48px 0 32px 0;
+}
+.oj-hero-content h1 {
+  font-size: 2.7rem;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  margin-bottom: 10px;
+}
+.oj-hero-content .oj-highlight {
+  color: #1976d2;
+  background: linear-gradient(90deg, #ffa116 60%, #ffd54f 100%);
+  border-radius: 8px;
+  padding: 0 8px;
+}
+.oj-hero-content .oj-subtitle {
+  font-size: 1.25rem;
+  color: #333;
+  margin-bottom: 24px;
+}
+.oj-features-modern {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 32px;
+  justify-content: center;
+  margin-bottom: 56px;
+}
+.oj-feature-card-modern {
+  background: #fff;
+  border-radius: 18px;
+  box-shadow: 0 4px 24px rgba(25,118,210,0.10);
+  padding: 36px 36px 28px 36px;
+  min-width: 240px;
+  max-width: 300px;
+  flex: 1 1 240px;
+  text-align: center;
+  transition: box-shadow 0.18s, transform 0.18s;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.oj-feature-card-modern:hover {
+  box-shadow: 0 8px 32px rgba(25,118,210,0.16);
+  transform: translateY(-4px) scale(1.03);
+}
+.oj-feature-icon {
+  margin-bottom: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.oj-feature-card-modern h2 {
+  color: #1976d2;
+  margin-bottom: 10px;
+  font-size: 1.25rem;
+  font-weight: 700;
+}
+.oj-feature-card-modern p {
+  color: #444;
+  font-size: 1.05rem;
+}
+.oj-get-started-modern {
+  text-align: center;
+  margin-top: 48px;
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 2px 12px rgba(25,118,210,0.08);
+  padding: 36px 18px 32px 18px;
+  max-width: 500px;
+  margin-left: auto;
+  margin-right: auto;
+}
+.oj-get-started-modern h2 {
+  margin-bottom: 10px;
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+.oj-get-started-modern p {
+  color: #555;
+  margin-bottom: 18px;
+  font-size: 1.08rem;
+}
+@media (max-width: 900px) {
+  .oj-features-modern {
+    flex-direction: column;
+    align-items: center;
+  }
+  .oj-feature-card-modern {
+    max-width: 100%;
+    width: 100%;
+  }
+  .oj-hero-content h1 {
+    font-size: 2rem;
+  }
+}
+
+.oj-about {
+  background: #fff7e6;
+  border-radius: 16px;
+  box-shadow: 0 2px 12px rgba(255,161,22,0.07);
+  padding: 32px 24px;
+  margin: 0 auto 40px auto;
+  max-width: 900px;
+  text-align: center;
+}
+.oj-about h2 {
+  color: #ffa116;
+  margin-bottom: 10px;
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+.oj-about p {
+  color: #444;
+  font-size: 1.08rem;
+  margin-bottom: 0;
+}
+.oj-features {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 24px;
+  justify-content: center;
+  margin-bottom: 48px;
+}
+.oj-feature-card {
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+  padding: 28px 32px;
+  min-width: 220px;
+  max-width: 260px;
+  flex: 1 1 220px;
+  text-align: center;
+  transition: box-shadow 0.18s, transform 0.18s;
+}
+.oj-feature-card:hover {
+  box-shadow: 0 8px 24px rgba(255,161,22,0.13);
+  transform: translateY(-4px) scale(1.03);
+}
+.oj-feature-card h2 {
+  color: #ffa116;
+  margin-bottom: 10px;
+}
+.oj-feature-card p {
+  color: #444;
+  font-size: 1rem;
+}
 @media (max-width: 900px) {
   .oj-features {
     flex-direction: column;

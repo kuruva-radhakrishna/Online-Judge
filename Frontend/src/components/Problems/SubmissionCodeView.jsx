@@ -1,4 +1,4 @@
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useLocation } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import axios from 'axios';
 import './ProblemSubmissions.css';
@@ -17,10 +17,13 @@ function formatFormalDate(dateStr) {
 }
 
 function SubmissionCodeView() {
-  const { id } = useParams();
+  const { id, contestId } = useParams();
+  const location = useLocation();
   const [submission, setSubmission] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  // Try to get contestId from params or location.state
+  const contestIdParam = contestId || (location.state && location.state.contestId);
 
   useEffect(() => {
     const fetchSubmission = async () => {
@@ -30,7 +33,11 @@ function SubmissionCodeView() {
         setSubmission(res.data);
         setError(null);
       } catch (err) {
-        setError('Could not fetch submission.');
+        let msg = 'Could not fetch submission.';
+        if (err.response && err.response.data && err.response.data.message) {
+          msg = err.response.data.message;
+        }
+        setError(msg);
         setSubmission(null);
       } finally {
         setLoading(false);
@@ -40,8 +47,36 @@ function SubmissionCodeView() {
   }, [id]);
 
   if (loading) return <div className="problem-submissions"><p>Loading...</p></div>;
-  if (error) return <div className="problem-submissions"><p style={{color: 'red'}}>{error}</p></div>;
+  if (error) {
+    let displayMsg = error;
+    if (error === 'Submission not found') {
+      displayMsg = 'Submission not found.';
+    } else if (error === 'You are not allowed to view this submission during the contest.') {
+      displayMsg = 'This problem is part of an ongoing contest. You are not allowed to view this submission now.';
+    }
+    return (
+      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '30vh' }}>
+        <div style={{
+          background: '#fff',
+          color: '#e53935',
+          padding: '32px 24px',
+          borderRadius: '16px',
+          boxShadow: '0 2px 16px rgba(25,118,210,0.08)',
+          fontSize: '1.25rem',
+          fontWeight: 500,
+          textAlign: 'center',
+          maxWidth: 700,
+          width: '100%'
+        }}>
+          {displayMsg}
+        </div>
+      </div>
+    );
+  }
   if (!submission) return <div className="problem-submissions"><p>No submission found.</p></div>;
+
+  // Contest constraint logic
+  
 
   return (
     <div className="problem-submissions" style={{maxWidth: 700, margin: '32px auto'}}>

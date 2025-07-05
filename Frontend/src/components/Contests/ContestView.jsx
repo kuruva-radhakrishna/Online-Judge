@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import { useParams, Link, Outlet } from "react-router-dom";
 import "./ContestView.css";
 import ReactMarkdown from 'react-markdown';
+import CircularProgress from '@mui/material/CircularProgress';
 
 function ContestView({ contestId }) {
     const [contest, setContest] = useState(null);
@@ -36,7 +37,7 @@ function ContestView({ contestId }) {
         return () => clearInterval(timer);
     }, [contestId]);
 
-    if (status === "loading") return <div>Loading...</div>;
+    if (status === "loading") return <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '40vh' }}><CircularProgress size={60} thickness={5} /></div>;
     if (error) return <div style={{ color: "red" }}>{error}</div>;
     if (status === "notlive" || status === "future")
         return (

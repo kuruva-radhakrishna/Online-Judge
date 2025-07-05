@@ -22,6 +22,7 @@ import NewContest from './components/Contests/NewContest';
 import ContestProblemView from './components/Contests/ContestProblemView';
 import ContestProblemDescription from './components/Contests/ContestProblemDescription';
 import ContestProblemSubmissions from './components/Contests/ContestProblemSubmissions';
+import EditContest from './components/Contests/EditContest';
 
 function ProtectedRoute({ children }) {
   const { user, loading } = useAuth();
@@ -85,6 +86,11 @@ function AppRoutes() {
             </ProtectedRoute>
           } />
           <Route path="/contests/new" element={<NewContest />} />
+          <Route path="/contests/:id/edit" element={
+            <ProtectedRoute>
+              <EditContest />
+            </ProtectedRoute>
+          } />
         </Routes>
       </div>
     </>

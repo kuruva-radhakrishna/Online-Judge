@@ -44,7 +44,7 @@
   margin-bottom: 24px;
 }
 .discussion-form textarea {
-  resize: vertical;
+  resize: none;
   border-radius: 8px;
   border: 1px solid #e3eafc;
   padding: 10px 12px;

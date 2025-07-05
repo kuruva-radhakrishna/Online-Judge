@@ -9,7 +9,7 @@ router.post('/register', UserController.register);
 router.post('/login', UserController.login);
 
 // Check authentication status
-router.get('/check-auth', UserController.checkAuth);
+router.get('/auth/check', UserController.checkAuth);
 
 // Logout route
 router.post('/logout', UserController.logout);

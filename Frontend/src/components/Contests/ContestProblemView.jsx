@@ -10,6 +10,7 @@ import Box from '@mui/material/Box';
 import ReactMarkdown from 'react-markdown';
 import '../../App.css';
 import ContestProblemDescription from './ContestProblemDescription';
+import CircularProgress from '@mui/material/CircularProgress';
 
 function ContestProblemView() {
     const { contestId, problemId } = useParams();
@@ -104,13 +105,13 @@ function ContestProblemView() {
     }, [contestStatus, contest]);
 
     if (contestStatus === "loading") {
-        return <p>Loading...</p>;
+        return <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '40vh' }}><CircularProgress size={60} thickness={5} /></div>;
     }
     if (contestStatus !== "ongoing") {
         return <Navigate to={`/problem/${problemId}/description`} replace />;
     }
     if (!problem) {
-        return <p>Loading problem...</p>;
+        return <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '40vh' }}><CircularProgress size={60} thickness={5} /></div>;
     }
 
     const handleRun = async () => {

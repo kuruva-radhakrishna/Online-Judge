@@ -3,21 +3,26 @@ import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import "./Contests.css";
 import { useAuth } from "../../contexts/AuthContext";
+import CircularProgress from '@mui/material/CircularProgress';
 
 function Contests() {
     const [contests, setContests] = useState([]);
     const [now, setNow] = useState(new Date());
     const { id } = useParams();
     const { user } = useAuth();
+    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         const fetchData = async () => {
+            setLoading(true);
             try {
                 const result = await axios.get('http://localhost:3000/contests', {
                     withCredentials: true,
                 });
                 setContests(result.data);
             } catch (error) {
+            } finally {
+                setLoading(false);
             }
         };
         fetchData();
@@ -132,14 +137,19 @@ function Contests() {
 
     return (
         <div className="contest-view">
-            {user && user.role === 'admin' && (
+            {loading && (
+                <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '40vh' }}>
+                    <CircularProgress size={60} thickness={5} />
+                </div>
+            )}
+            {!loading && user && user.role === 'admin' && (
                 <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 24 }}>
                     <Link to="/contests/new" className="create-contest-btn">Create Contest</Link>
                 </div>
             )}
-            {noContests ? (
+            {!loading && noContests ? (
                 <div className="no-contests">No contests found.</div>
-            ) : (
+            ) : !loading && (
                 <>
                     {renderTable(present, "Ongoing Contests")}
                     {renderTable(future, "Upcoming Contests")}

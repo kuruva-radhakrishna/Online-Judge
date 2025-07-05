@@ -33,12 +33,12 @@ function Profile() {
     const [deleteMsg, setDeleteMsg] = useState("");
     const [createdContests, setCreatedContests] = useState([]);
     const [attendedContests, setAttendedContests] = useState([]);
+    const [loading, setLoading] = useState(true);
     const navigate = useNavigate();
 
     useEffect(() => {
         const fetchData = async () => {
             try {
-                
                 if (user && user.role === 'admin') {
                     const res = await axios.get('http://localhost:3000/admin/problems/', { withCredentials: true });
                     setProblemsByUser(res.data);
@@ -80,6 +80,8 @@ function Profile() {
                 setAttendedContests(attended);
             } catch (error) {
                 // handle error
+            } finally {
+                setLoading(false);
             }
         };
         fetchData();
@@ -89,6 +91,7 @@ function Profile() {
         // Build solved set
         const solvedSet = new Set();
         (submissionsByUser || []).forEach(sub => {
+            if (!sub || !sub.problem_id) return; // null check
             const pid = typeof sub.problem_id === 'object' ? sub.problem_id._id : sub.problem_id;
             if (sub.verdict === 'Accepted' && pid) {
                 solvedSet.add(pid.toString());
@@ -98,6 +101,7 @@ function Profile() {
         let t = [0, 0, 0];
         let s = [0, 0, 0];
         (problems || []).forEach(prob => {
+            if (!prob || !prob._id) return; // null check
             let idx = prob.difficulty === 'easy' ? 0 : prob.difficulty === 'medium' ? 1 : 2;
             t[idx]++;
             if (solvedSet.has(prob._id.toString())) s[idx]++;
@@ -135,8 +139,8 @@ function Profile() {
     const isNewUser = user && user.createdAt && (new Date() - new Date(user.createdAt)) < 7 * 24 * 60 * 60 * 1000;
     const has100Solved = solvedTotal >= 100;
 
-    if (!user) {
-        return <div>Loading profile...</div>;
+    if (!user || loading) {
+        return <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '60vh' }}><CircularProgress size={60} thickness={5} /></div>;
     }
 
     return (
@@ -366,22 +370,25 @@ function Profile() {
                         </TableHead>
                         <TableBody>
                             {submissionsByUser && submissionsByUser.length > 0 ? (
-                                submissionsByUser.map((submission, index) => (
-                                    <TableRow key={submission._id}>
-                                        <TableCell>{index + 1}</TableCell>
-                                        <TableCell>
-                                            <Link to={`/problem/${submission.problem_id._id || submission.problem_id}/description`} style={{ textDecoration: 'none', color: '#1976d2' }}>
-                                                {submission.problem_id.problemName || submission.problem_id}
-                                            </Link>
-                                        </TableCell>
-                                        <TableCell>{submission.language}</TableCell>
-                                        <TableCell>{submission.verdict}</TableCell>
-                                        <TableCell>{formatFormalDate(submission.submittedAt)}</TableCell>
-                                        <TableCell>
-                                            <Link to={`/submission/${submission._id}`} className="view-code-link" style={{ color: '#ffffff', fontWeight: 600 }}>View Code</Link>
-                                        </TableCell>
-                                    </TableRow>
-                                ))
+                                submissionsByUser.map((submission, index) => {
+                                    if (!submission || !submission._id || !submission.problem_id) return null;
+                                    return (
+                                        <TableRow key={submission._id}>
+                                            <TableCell>{index + 1}</TableCell>
+                                            <TableCell>
+                                                <Link to={`/problem/${submission.problem_id._id || submission.problem_id}/description`} style={{ textDecoration: 'none', color: '#1976d2' }}>
+                                                    {submission.problem_id.problemName || submission.problem_id}
+                                                </Link>
+                                            </TableCell>
+                                            <TableCell>{submission.language}</TableCell>
+                                            <TableCell>{submission.verdict}</TableCell>
+                                            <TableCell>{formatFormalDate(submission.submittedAt)}</TableCell>
+                                            <TableCell>
+                                                <Link to={`/submission/${submission._id}`} className="view-code-link" style={{ color: '#ffffff', fontWeight: 600 }}>View Code</Link>
+                                            </TableCell>
+                                        </TableRow>
+                                    );
+                                })
                             ) : (
                                 <TableRow>
                                     <TableCell colSpan={6} align="center">No submissions found.</TableCell>

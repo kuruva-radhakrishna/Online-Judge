@@ -4,6 +4,10 @@ import ReactMarkdown from 'react-markdown';
 import { useAuth } from '../../contexts/AuthContext';
 import './NewProblem.css';
 
+const ALLOWED_TOPICS = [
+  "array", "string", "hash table", "dynamic programming", "math", "sorting", "greedy", "tree", "graph", "binary search", "recursion", "backtracking", "stack", "queue", "heap", "linked list", "sliding window", "two pointers", "bit manipulation", "number theory", "geometry", "database", "shell", "javascript", "concurrency", "depth-first search", "breadth-first search", "trie", "segment tree", "disjoint set", "topological sort", "shortest path", "minimum spanning tree", "game theory", "probability", "combinatorics", "implementation", "simulation", "other"
+];
+
 function NewProblem() {
   const { user, loading } = useAuth();
   const [problemName, setProblemName] = useState('');
@@ -11,7 +15,7 @@ function NewProblem() {
   const [constraints, setConstraints] = useState('');
   const [testCases, setTestCases] = useState([{ input: '', output: '', isPublic: true }]);
   const [difficulty, setDifficulty] = useState('medium');
-  const [topics, setTopics] = useState('');
+  const [topics, setTopics] = useState([]);
   const [message, setMessage] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [aiLoading, setAiLoading] = useState(false);
@@ -29,6 +33,16 @@ function NewProblem() {
   const addTestCase = () => setTestCases(tc => [...tc, { input: '', output: '', isPublic: true }]);
   const removeTestCase = idx => setTestCases(tc => tc.filter((_, i) => i !== idx));
 
+  const handleTopicChange = (e) => {
+    const value = e.target.value;
+    if (value && !topics.includes(value)) {
+      setTopics([...topics, value]);
+    }
+  };
+  const removeTopic = (topic) => {
+    setTopics(topics.filter(t => t !== topic));
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setSubmitting(true);
@@ -41,11 +55,12 @@ function NewProblem() {
           Constraints: constraints.split('\n').map(s => s.trim()).filter(Boolean),
           TestCases: testCases,
           difficulty,
-          topics: topics.split(',').map(t => t.trim()).filter(Boolean)
+          topics,
+          CreatedBy: user._id
         }
       }, { withCredentials: true });
       setMessage('Problem created successfully!');
-      setProblemName(''); setProblemDescription(''); setConstraints(''); setTestCases([{ input: '', output: '', isPublic: true }]); setDifficulty('medium'); setTopics('');
+      setProblemName(''); setProblemDescription(''); setConstraints(''); setTestCases([{ input: '', output: '', isPublic: true }]); setDifficulty('medium'); setTopics([]);
     } catch (err) {
       setMessage('Error creating problem.');
     }
@@ -63,7 +78,7 @@ function NewProblem() {
           Constraints: constraints.split('\n').map(s => s.trim()).filter(Boolean),
           TestCases: testCases,
           difficulty,
-          topics: topics.split(',').map(t => t.trim()).filter(Boolean)
+          topics
         }
       }, { withCredentials: true });
 
@@ -72,7 +87,7 @@ function NewProblem() {
         setProblemName(prob.problemName || problemName);
         setProblemDescription(prob.problemDescription || problemDescription);
         setConstraints((prob.Constraints || []).join('\n'));
-        setTopics((prob.topics || []).join(', '));
+        setTopics(prob.topics || []);
         setDifficulty(prob.difficulty || difficulty);
         if (prob.TestCases && Array.isArray(prob.TestCases)) {
           setTestCases(prob.TestCases);
@@ -80,11 +95,9 @@ function NewProblem() {
         setMessage('AI completed the problem!');
       } else {
         setMessage('AI did not return a valid problem.');
-        console.error('AI response missing problem object:', result.data);
       }
     } catch (error) {
       setMessage('AI completion failed.');
-      console.error('AI completion error:', error);
     }
     setAiLoading(false);
   };
@@ -135,12 +148,25 @@ function NewProblem() {
         <label>Constraints (one per line)
           <textarea value={constraints} onChange={e => setConstraints(e.target.value)} rows={2} required />
         </label>
-        <label>Topics (comma separated)
-          <input type="text" value={topics} onChange={e => setTopics(e.target.value)} />
+        <label>Topics
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 8 }}>
+            {topics.map(topic => (
+              <span key={topic} className="topic-tag" style={{ background: '#1976d2', color: '#fff', borderRadius: 12, padding: '4px 12px', marginRight: 4, fontWeight: 500 }}>
+                {topic}
+                <button type="button" style={{ marginLeft: 6, background: 'none', border: 'none', color: '#fff', cursor: 'pointer', fontWeight: 700 }} onClick={() => removeTopic(topic)}>&times;</button>
+              </span>
+            ))}
+            <select onChange={handleTopicChange} value="" style={{ minWidth: 120, padding: 6, borderRadius: 8 }}>
+              <option value="">Add topic...</option>
+              {ALLOWED_TOPICS.filter(t => !topics.includes(t)).map(t => (
+                <option key={t} value={t}>{t.charAt(0).toUpperCase() + t.slice(1)}</option>
+              ))}
+            </select>
+          </div>
         </label>
         <label>Difficulty
           <div className="difficulty-pill-group">
-            {['easy', 'medium', 'difficult'].map((level) => (
+            {['easy', 'medium', 'hard'].map((level) => (
               <button
                 type="button"
                 key={level}

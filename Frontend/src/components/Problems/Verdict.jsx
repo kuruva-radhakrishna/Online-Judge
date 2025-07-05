@@ -24,25 +24,29 @@ function Verdict({ verdicts }) {
             justifyContent: 'center',
           }}
         >
-          {verdicts.map((verdict, index) => (
-            <div
-              key={index}
-              className="verdict"
-              style={{
-                background: '#f5f7fa',
-                color: getColor(verdict),
-                padding: '10px 14px',
-                borderRadius: 8,
-                fontWeight: 600,
-                fontSize: '1rem',
-                minWidth: 100,
-                textAlign: 'center',
-                boxShadow: '0 1px 4px rgba(0,0,0,0.04)',
-              }}
-            >
-              TC {index + 1}: {verdict}
-            </div>
-          ))}
+          {verdicts.map((verdict, index) => {
+            // Support both string and object with status
+            const verdictText = verdict && typeof verdict === 'object' && verdict.status ? verdict.status : verdict;
+            return (
+              <div
+                key={index}
+                className="verdict"
+                style={{
+                  background: '#f5f7fa',
+                  color: getColor(verdictText),
+                  padding: '10px 14px',
+                  borderRadius: 8,
+                  fontWeight: 600,
+                  fontSize: '1rem',
+                  minWidth: 100,
+                  textAlign: 'center',
+                  boxShadow: '0 1px 4px rgba(0,0,0,0.04)',
+                }}
+              >
+                TC {index + 1}: {verdictText}
+              </div>
+            );
+          })}
         </div>
       ) : (
         <div

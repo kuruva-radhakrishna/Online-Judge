@@ -3,7 +3,7 @@
   color: #222;
   margin: 0 !important;
   padding: 0 100px;
-  box-shadow: none;
+  box-shadow: 0 2px 12px rgba(25,118,210,0.06);
   border: none;
   border-radius: 0;
   min-height: 56px;
@@ -21,13 +21,29 @@
   }
 }
 
+.ca-navbar-logo-svg {
+  display: flex;
+  align-items: center;
+  margin-right: 10px;
+}
+
+.ca-navbar-brand {
+  font-weight: 800;
+  font-size: 1.45rem;
+  color: #222;
+  letter-spacing: 1px;
+  font-family: 'Segoe UI', Arial, sans-serif;
+  margin-right: 18px;
+}
+
 .navbar-logo {
   display: flex;
   align-items: center;
   font-size: 1.3rem;
   font-weight: bold;
-  margin-right: 20px;
+  margin-right: 28px;
   letter-spacing: 0.5px;
+  text-decoration: none !important;
 }
 
 .nav-title {

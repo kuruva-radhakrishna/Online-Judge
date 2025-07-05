@@ -1,100 +1,145 @@
 const Submission = require('../Models/Submissions');
 const Problem = require('../Models/Problems');
 const axios = require('axios');
+const Contest = require('../Models/Contests');
 
-// Create a new submission and judge it
+exports.allSubmissionsByUser = async (req, res) => {
+    //return all submissions of User
+
+    try {
+        const submissionsByUser = await Submission.find({ user_id: req.user._id }).populate('problem_id');
+        if (!submissionsByUser) {
+            return res.status(500).json({ message: "Database Issue" });
+        }
+        return res.json(submissionsByUser);
+    } catch (error) {
+        res.status(500).json({ message: "Internal Sever Issue" });
+    }
+};
+
+exports.problemSubmissionsByUSer = async (req, res) => {
+    //return submissions made by the current user on the specific problem
+    try {
+        const id = req.params.id;
+        console.log('Submissions');
+        console.log(id);
+        const submissionsByUser = await Submission.find({ user_id: req.user._id, problem_id: id });
+        console.log("submissions by user",submissionsByUser);
+        if (!submissionsByUser) {
+            return res.status(500).json({ message: "Database Issue" });
+        }
+        return res.json(submissionsByUser);
+    } catch (error) {
+        res.status(500).json({ message: "Internal Sever Issue" });
+    }
+};
+
 exports.createSubmission = async (req, res) => {
     try {
+        console.log('creating new submission');
         const { problem_id, code, language } = req.body;
-        const user_id = req.user && req.user._id ? req.user._id : req.body.user_id;
-        if (!problem_id || !code || !language || !user_id) {
-            return res.status(400).json({ message: 'Missing required fields.' });
-        }
         const newSubmission = {
             problem_id,
             code,
             language,
-            user_id,
+            user_id: req.user._id,
         };
+
         const verdicts = [];
+        let failedCase = null;
+
         const problem = await Problem.findById(problem_id);
         if (!problem) {
-            return res.status(404).json({ message: 'Problem not found' });
+            return res.status(404).json({ message: "Problem not found" });
         }
+
         for (const tc of problem.TestCases) {
-            const result = await axios.post('http://localhost:8000/run', {
+            const result = await axios.post("http://localhost:8000/run", {
                 code,
                 language,
                 input: tc.input,
             });
+
             const output = result.data.output?.output;
+
             if (output !== undefined) {
                 if (output.trim() === tc.output.trim()) {
                     verdicts.push('Accepted');
                 } else {
                     verdicts.push('Wrong Answer');
+                    failedCase = {
+                        input: tc.input,
+                        expected: tc.output,
+                        actual: output
+                    };
                     break;
                 }
             } else {
+                console.log(result);
                 verdicts.push(result.data.errorType || 'Runtime Error');
+                failedCase = {
+                    input: tc.input,
+                    expected: tc.output,
+                    actual: result.data.output?.output || result.data.errorType || 'No Output'
+                };
                 break;
             }
         }
+
         const n = verdicts.length;
         newSubmission.verdict = verdicts[n - 1] || 'Unknown';
+
         const submissionResult = await Submission.create(newSubmission);
+
         if (submissionResult) {
-            return res.status(200).json(verdicts);
+            console.log('Created Submission');
+            if (newSubmission.verdict === 'Accepted') {
+                return res.status(200).json({verdicts});
+            } else {
+                return res.status(200).json({ verdicts, failedCase });
+            }
         } else {
-            return res.status(500).json({ message: 'Issue in creating submission' });
+            return res.status(500).json({ message: "Issue in creating submission" });
         }
+
     } catch (error) {
         console.error('Error while creating submission:', error);
-        return res.status(500).json({ message: 'Internal Server Error' });
+        return res.status(500).json({ message: "Internal Server Error" });
     }
 };
 
-// Get all submissions for a problem
-exports.getSubmissionsByProblem = async (req, res) => {
+exports.getSubmission = async (req, res) => {
     try {
-        const { problemId } = req.params;
-        const submissions = await Submission.find({ problem_id: problemId }).populate('user_id', 'firstname lastname email');
-        res.json(submissions);
-    } catch (err) {
-        res.status(500).json({ error: 'Failed to fetch submissions' });
-    }
-};
+        const submission = await Submission.findById(req.params.id);
+        if (!submission) {
+            return res.status(404).json({ message: 'Submission not found' });
+        }
+        const now = new Date();
+        // Find all ongoing contests that include this problem
+        const ongoingContests = await Contest.find({
+            startTime: { $lte: now },
+            endTime: { $gte: now },
+            'problems.problem_id': submission.problem_id
+        });
 
-// Get all submissions by a user
-exports.getSubmissionsByUser = async (req, res) => {
-    try {
-        const { userId } = req.params;
-        const submissions = await Submission.find({ user_id: userId }).populate('problem_id', 'title');
-        res.json(submissions);
-    } catch (err) {
-        res.status(500).json({ error: 'Failed to fetch submissions' });
-    }
-};
-
-// Get all submissions for a contest
-exports.getSubmissionsByContest = async (req, res) => {
-    try {
-        const { contestId } = req.params;
-        const submissions = await Submission.find({ contest_id: contestId }).populate('user_id', 'firstname lastname email').populate('problem_id', 'title');
-        res.json(submissions);
-    } catch (err) {
-        res.status(500).json({ error: 'Failed to fetch contest submissions' });
-    }
-};
-
-// Get a single submission by ID
-exports.getSubmissionById = async (req, res) => {
-    try {
-        const { id } = req.params;
-        const submission = await Submission.findById(id).populate('user_id', 'firstname lastname email').populate('problem_id', 'title');
-        if (!submission) return res.status(404).json({ error: 'Submission not found' });
+        if (ongoingContests.length > 0) {
+            // If submission is for a contest, only allow if contest_id matches an ongoing contest
+            if (submission.contest_id) {
+                const allowed = ongoingContests.some(contest =>
+                    submission.contest_id && submission.contest_id.toString() === contest._id.toString()
+                );
+                if (!allowed) {
+                    return res.status(403).json({ message: 'You are not allowed to view this submission during the contest.' });
+                }
+            } else {
+                // Submission is NOT for a contest, but problem is in an ongoing contest
+                return res.status(403).json({ message: 'You are not allowed to view this submission during the contest.' });
+            }
+        }
+        // If not in any ongoing contest, or allowed, show the submission
         res.json(submission);
-    } catch (err) {
-        res.status(500).json({ error: 'Failed to fetch submission' });
+    } catch (error) {
+        res.status(500).json({ message: 'Internal Server Error' });
     }
-}; 
+};
+

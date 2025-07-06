@@ -105,4 +105,47 @@ exports.generateContestDescription = async (req, res) => {
     } catch (error) {
         res.status(500).json({ message: "AI contest description generation failed" });
     }
+};
+
+exports.chat = async (req, res) => {
+    try {
+        const { message, chatHistory } = req.body;
+        
+        // Build context from chat history
+        let context = "You are an expert programming assistant for an online coding judge platform. You help users with:\n\n";
+        context += "• Code review and debugging\n";
+        context += "• Algorithm explanations and problem-solving approaches\n";
+        context += "• Best practices and coding standards\n";
+        context += "• General programming questions\n";
+        context += "• Data structures and algorithms\n";
+        context += "• Competitive programming tips\n\n";
+        context += "Provide clear, concise, and helpful responses. Use markdown formatting for code blocks and emphasis. Be concise. Limit your response to a few sentences unless code is requested.\n\n";
+        
+        // Add chat history for context
+        if (chatHistory && chatHistory.length > 0) {
+            context += "Previous conversation:\n";
+            chatHistory.forEach((msg, index) => {
+                if (index < 10) { // Limit to last 10 messages for context
+                    context += `${msg.role === 'user' ? 'User' : 'Assistant'}: ${msg.content}\n`;
+                }
+            });
+            context += "\n";
+        }
+        
+        context += `User: ${message}\n\nAssistant:`;
+        
+        const response = await ai.models.generateContent({
+            model: "gemini-2.5-flash",
+            contents: context,
+            generationConfig: {
+                temperature: 0.7,
+                maxOutputTokens: 400,
+            }
+        });
+        
+        res.json({ response: response.text });
+    } catch (error) {
+        console.error('AI Chat Error:', error);
+        res.status(500).json({ message: "AI chat failed. Please try again." });
+    }
 }; 

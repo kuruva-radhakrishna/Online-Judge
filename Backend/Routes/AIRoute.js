@@ -13,6 +13,7 @@ router.post('/review', AIController.reviewCode);
 router.post('/createProblem', AIController.createProblemAI);
 router.post('/debug', AIController.debugCode);
 router.post('/contest-description', AIController.generateContestDescription);
+router.post('/chat', AIController.chat);
 
 router.post('/generate-problem', AIController.generateProblem);
 router.post('/suggest-test-cases', AIController.suggestTestCases);

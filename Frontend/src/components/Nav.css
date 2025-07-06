@@ -62,22 +62,64 @@
 }
 
 .nav-link {
-  margin-left: 10px !important;
-  margin-right: 10px !important;
+  margin-left: 8px !important;
+  margin-right: 8px !important;
   text-transform: none !important;
-  font-size: 1rem !important;
-  font-weight: 400 !important;
-  letter-spacing: 0.5px;
-  color: #222 !important;
+  font-size: 0.95rem !important;
+  font-weight: 500 !important;
+  letter-spacing: 0.3px;
+  color: #fff !important;
   background: transparent !important;
-  border-radius: 5px;
-  transition: background 0.18s, color 0.18s;
-  padding: 5px 12px !important;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+  padding: 8px 16px !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 6px;
+}
+
+.nav-link .MuiSvgIcon-root {
+  font-size: 1.1rem !important;
+  color: #fff !important;
 }
 
 .nav-link:hover {
-  background: #f5f5f7 !important;
+  background: #f8f9fa !important;
   color: #ffa116 !important;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(255, 161, 22, 0.15);
+}
+
+.nav-link:hover .MuiSvgIcon-root {
+  color: #ffa116 !important;
+}
+
+.nav-admin {
+  background: transparent !important;
+  color: #fff !important;
+  border: none !important;
+  font-weight: 500 !important;
+  border-radius: 8px !important;
+  padding: 8px 16px !important;
+  transition: background 0.18s, color 0.18s;
+}
+
+.nav-admin:hover {
+  background: #f8f9fa !important;
+  color: #ffa116 !important;
+}
+
+.nav-signup {
+  background: #fff3e0 !important;
+  color: #ffa116 !important;
+  border: 1px solid #ffe0b2 !important;
+  font-weight: 600 !important;
+}
+
+.nav-signup:hover {
+  background: #ffe0b2 !important;
+  color: #ff9800 !important;
+  border-color: #ffcc80 !important;
 }
 
 .nav-premium {
@@ -129,7 +171,7 @@ body {
   font-weight: 700 !important;
   font-size: 1.2rem !important;
   box-shadow: 0 1px 4px rgba(0,0,0,0.04);
-  transition: background 0.18s, color 0.18s;
+  transition: all 0.2s ease;
   border: none !important;
 }
 
@@ -141,5 +183,25 @@ body {
 
 .nav-profile-circle:hover {
   background: #ffe2b8 !important;
+  color: #ff9800 !important;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(255, 161, 22, 0.2);
+}
+
+/* Icon styling */
+.nav-admin .MuiSvgIcon-root {
+  color: #1976d2 !important;
+}
+
+.nav-signup .MuiSvgIcon-root {
+  color: #ffa116 !important;
+}
+
+.nav-profile-circle .MuiSvgIcon-root {
+  font-size: 1.3rem !important;
+  color: #ffa116 !important;
+}
+
+.nav-profile-circle:hover .MuiSvgIcon-root {
   color: #ff9800 !important;
 }

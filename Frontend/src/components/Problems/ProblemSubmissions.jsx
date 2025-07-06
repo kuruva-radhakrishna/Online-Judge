@@ -35,7 +35,7 @@ function ProblemSubmissions({ submissions, refreshSubmissions }) {
                                 <td>{submission.verdict}</td>
                                 <td>{formatFormalDate(submission.submittedAt)}</td>
                                 <td>
-                                    <Link to={`/submission/${submission._id}`} className="view-code-link">View Code</Link>
+                                    <Link to={`/submission/${submission._id}`} className="view-code-link">Code</Link>
                                 </td>
                                 
                             </tr>

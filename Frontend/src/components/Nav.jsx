@@ -6,6 +6,17 @@ import { Link, useNavigate } from 'react-router-dom';
 import './Nav.css';
 import { useAuth } from '../contexts/AuthContext';
 import axios from 'axios';
+import { 
+  Code as CodeIcon, 
+  EmojiEvents as ContestIcon, 
+  Add as AddIcon, 
+  Person as PersonIcon, 
+  Logout as LogoutIcon,
+  Login as LoginIcon,
+  PersonAdd as SignUpIcon,
+  Home as HomeIcon,
+  SmartToy as AIIcon
+} from '@mui/icons-material';
 
 function Nav() {
   const { user, setUser } = useAuth();
@@ -54,24 +65,82 @@ function Nav() {
         <div style={{ flexGrow: 1 }} />
         {user && (
           <>
-            <Button color="inherit" component={Link} to="/problems" className="nav-link">Problems</Button>
-            <Button color="inherit" component={Link} to="/contests" className="nav-link">Contests</Button>
+            <Button 
+              color="inherit" 
+              component={Link} 
+              to="/problems" 
+              className="nav-link"
+              startIcon={<CodeIcon />}
+            >
+              Problems
+            </Button>
+            <Button 
+              color="inherit" 
+              component={Link} 
+              to="/contests" 
+              className="nav-link"
+              startIcon={<ContestIcon />}
+            >
+              Contests
+            </Button>
             {user.role === 'admin' && (
               <>
-                <Button color="inherit" component={Link} to="/problems/new" className="nav-link">Create New Problem</Button>
-                <Button color="inherit" component={Link} to="/contests/new" className="nav-link">Create Contest</Button>
+                <Button 
+                  color="inherit" 
+                  component={Link} 
+                  to="/problems/new" 
+                  className="nav-link nav-admin"
+                  startIcon={<AddIcon />}
+                >
+                  Create Problem
+                </Button>
+                <Button 
+                  color="inherit" 
+                  component={Link} 
+                  to="/contests/new" 
+                  className="nav-link nav-admin"
+                  startIcon={<ContestIcon />}
+                >
+                  Create Contest
+                </Button>
               </>
             )}
-            <Link to="/profile" className="nav-link nav-profile-circle">
-              {user?.firstname?.[0]?.toUpperCase()}{user?.lastname?.[0]?.toUpperCase() || (!user?.firstname && 'U')}
+            <Link to="/profile" className="nav-link nav-profile-circle" style={{ textDecoration: 'none' }}>
+              {(
+                (user.firstname?.[0] || '').toUpperCase() +
+                (user.lastname?.[0] || '').toUpperCase()
+              )}
             </Link>
-            <Button color="inherit" onClick={handleLogout} className="nav-link">Logout</Button>
+            <Button 
+              color="inherit" 
+              onClick={handleLogout} 
+              className="nav-link"
+              startIcon={<LogoutIcon />}
+            >
+              Logout
+            </Button>
           </>
         )}
         {!user && (
           <>
-            <Button color="inherit" component={Link} to="/login" className="nav-link">Login</Button>
-            <Button color="inherit" component={Link} to="/signup" className="nav-link">Sign Up</Button>
+            <Button 
+              color="inherit" 
+              component={Link} 
+              to="/login" 
+              className="nav-link"
+              startIcon={<LoginIcon />}
+            >
+              Login
+            </Button>
+            <Button 
+              color="inherit" 
+              component={Link} 
+              to="/signup" 
+              className="nav-link"
+              startIcon={<SignUpIcon />}
+            >
+              Sign Up
+            </Button>
           </>
         )}
       </Toolbar>

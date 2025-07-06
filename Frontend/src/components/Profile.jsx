@@ -23,123 +23,34 @@ function formatFormalDate(dateStr) {
 }
 
 function Profile() {
-    const [problems, setProblems] = useState([]);
-    const [problemsByUser,setProblemsByUser] = useState([]);
-    const [submissionsByUser, setSubmissionsByUser] = useState([]);
     const { user } = useAuth();
-    const [profileUser, setProfileUser] = useState(null);
-    const [solved, setSolved] = useState([0, 0, 0]);
-    const [total, setTotal] = useState([0, 0, 0]);
-    const [deleteMsg, setDeleteMsg] = useState("");
-    const [createdContests, setCreatedContests] = useState([]);
-    const [attendedContests, setAttendedContests] = useState([]);
+    const [profileData, setProfileData] = useState(null);
     const [loading, setLoading] = useState(true);
+    const [deleteMsg, setDeleteMsg] = useState("");
     const navigate = useNavigate();
 
     useEffect(() => {
-        const fetchData = async () => {
+        const fetchProfile = async () => {
             try {
-                if (user && user.role === 'admin') {
-                    const res = await axios.get('http://localhost:3000/admin/problems/', { withCredentials: true });
-                    setProblemsByUser(res.data);
-                } 
-                const result = await axios.get('http://localhost:3000/problems', { withCredentials: true });
-                const submissions = await axios.get('http://localhost:3000/submissions/', { withCredentials: true });
-                setProblems(result.data || []);
-                setSubmissionsByUser(submissions.data || []);
-                // Fetch contests created by user
-                const createdContestsRes = await axios.get('http://localhost:3000/admin/contests/created-by-me', { withCredentials: true });
-                setCreatedContests(createdContestsRes.data || []);
-                // Fetch all contests and search leaderboards for the current user
-                const contestsRes = await axios.get('http://localhost:3000/contests', { withCredentials: true });
-                const allContests = contestsRes.data || [];
-                const attended = [];
-                allContests.forEach(contest => {
-                    if (contest.leaderBoard && Array.isArray(contest.leaderBoard)) {
-                        // Sort leaderboard by points desc, then lastSubmission asc
-                        const sorted = [...contest.leaderBoard].sort((a, b) => {
-                            if (b.points !== a.points) return b.points - a.points;
-                            if (!a.lastSubmission) return 1;
-                            if (!b.lastSubmission) return -1;
-                            return new Date(a.lastSubmission) - new Date(b.lastSubmission);
-                        });
-                        const idx = sorted.findIndex(e => e.user_id && (e.user_id._id === user._id || e.user_id === user._id));
-                        if (idx !== -1) {
-                            const entry = sorted[idx];
-                            attended.push({
-                                ...contest,
-                                userStats: {
-                                    rank: idx + 1,
-                                    points: entry.points,
-                                    solvedProblems: entry.solvedProblems ? entry.solvedProblems.length : 0,
-                                }
-                            });
-                        }
-                    }
-                });
-                setAttendedContests(attended);
+                setLoading(true);
+                const res = await axios.get('http://localhost:3000/api/profile/summary', { withCredentials: true });
+                setProfileData(res.data);
             } catch (error) {
                 // handle error
             } finally {
                 setLoading(false);
             }
         };
-        fetchData();
-    }, [user]);
-
-    useEffect(() => {
-        // Build solved set
-        const solvedSet = new Set();
-        (submissionsByUser || []).forEach(sub => {
-            if (!sub || !sub.problem_id) return; // null check
-            const pid = typeof sub.problem_id === 'object' ? sub.problem_id._id : sub.problem_id;
-            if (sub.verdict === 'Accepted' && pid) {
-                solvedSet.add(pid.toString());
-            }
-        });
-        // Count per difficulty
-        let t = [0, 0, 0];
-        let s = [0, 0, 0];
-        (problems || []).forEach(prob => {
-            if (!prob || !prob._id) return; // null check
-            let idx = prob.difficulty === 'easy' ? 0 : prob.difficulty === 'medium' ? 1 : 2;
-            t[idx]++;
-            if (solvedSet.has(prob._id.toString())) s[idx]++;
-        });
-        setTotal(t);
-        setSolved(s);
-    }, [problems, submissionsByUser]);
-
-    const handleDeleteProblem = async (problemId) => {
-        if (!window.confirm("Are you sure you want to delete this problem? This will also delete all submissions for this problem.")) return;
-        try {
-            const result = await axios.delete(`http://localhost:3000/admin/problems/${problemId}`, { withCredentials: true });
-            setProblems(problems.filter(p => p._id !== problemId));
-            setDeleteMsg("Problem deleted successfully.");
-            setTimeout(() => setDeleteMsg(""), 2000);
-        } catch (err) {
-            setDeleteMsg("Failed to delete problem.");
-            setTimeout(() => setDeleteMsg(""), 2000);
-        }
-    };
-
-    const handleDeleteContest = async (contestId) => {
-        if (!window.confirm("Are you sure you want to delete this contest? This will also update all related submissions.")) return;
-        try {
-            await axios.delete(`http://localhost:3000/admin/contests/${contestId}`, { withCredentials: true });
-            setCreatedContests(createdContests.filter(c => c._id !== contestId));
-        } catch (err) {
-            alert("Failed to delete contest.");
-        }
-    };
+        fetchProfile();
+    }, []);
 
     // Calculate badges
-    const solvedTotal = solved.reduce((a, b) => a + b, 0);
-    const bestRank = attendedContests.length > 0 ? Math.min(...attendedContests.map(c => c.userStats?.rank || 9999)) : null;
-    const isNewUser = user && user.createdAt && (new Date() - new Date(user.createdAt)) < 7 * 24 * 60 * 60 * 1000;
+    const solvedTotal = profileData?.solvedStats?.total || 0;
+    const bestRank = profileData?.attendedContests?.length > 0 ? Math.min(...profileData.attendedContests.map(c => c.userStats?.rank || 9999)) : null;
+    const isNewUser = profileData?.user && profileData.user.createdAt && (new Date() - new Date(profileData.user.createdAt)) < 7 * 24 * 60 * 60 * 1000;
     const has100Solved = solvedTotal >= 100;
 
-    if (!user || loading) {
+    if (!profileData || loading) {
         return <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '60vh' }}><CircularProgress size={60} thickness={5} /></div>;
     }
 
@@ -148,14 +59,17 @@ function Profile() {
             <div className="profile-banner"></div>
             <Card className="profile-header-card">
                 <Avatar className="profile-avatar">
-                    {user.firstname?.[0]?.toUpperCase()}{user.lastname?.[0]?.toUpperCase()}
+                    {(
+                        (profileData.user.firstname?.[0] || '').toUpperCase() +
+                        (profileData.user.lastname?.[0] || '').toUpperCase()
+                    )}
                 </Avatar>
                 <Box className="profile-header-info">
                     <Typography variant="h4" fontWeight={700}>
-                        {user.firstname} {user.lastname}
+                        {profileData.user.firstname} {profileData.user.lastname}
                         {isNewUser && <span className="profile-badge">New</span>}
                     </Typography>
-                    <Typography variant="subtitle1" color="text.secondary">{user.email}</Typography>
+                    <Typography variant="subtitle1" color="text.secondary">{profileData.user.email}</Typography>
                 </Box>
             </Card>
             {/* Row: Solved Problems + Participated Contests */}
@@ -164,18 +78,20 @@ function Profile() {
                 <Card className="profile-section-card" sx={{ flex: 1, mb: 0 }}>
                     <Typography className="profile-section-title">Solved Problems</Typography>
                     <Box sx={{ display: 'flex', justifyContent: 'center', gap: 4 }}>
-                        {[0, 1, 2].map((idx) => {
+                        {['easy', 'medium', 'hard'].map((level, idx) => {
                             const colors = ['#43a047', '#ffb300', '#e53935'];
                             const labelColors = ['#43a047', '#ffb300', '#e53935'];
                             const labels = ['Easy', 'Medium', 'Hard'];
-                            const value = total[idx] ? Math.round((solved[idx] / total[idx]) * 100) : 0;
+                            const solved = profileData.solvedStats ? profileData.solvedStats[level] : 0;
+                            const total = profileData.problemTotals ? profileData.problemTotals[level] : 0;
+                            const percent = total > 0 ? (solved / total) * 100 : 0;
                             return (
                                 <Box
                                     key={labels[idx]}
                                     textAlign="center"
                                     sx={{
-                                        width: 90,
-                                        height: 100,
+                                        width: 120,
+                                        height: 130,
                                         display: 'flex',
                                         flexDirection: 'column',
                                         alignItems: 'center',
@@ -187,25 +103,25 @@ function Profile() {
                                         sx={{
                                             color: labelColors[idx],
                                             fontWeight: 700,
-                                            fontSize: '1.1rem',
-                                            mb: 0.5,
+                                            fontSize: '1.25rem',
+                                            mb: 1,
                                             letterSpacing: 0.2,
                                         }}
                                     >
                                         {labels[idx]}
                                     </Typography>
-                                    <Box sx={{ position: 'relative', width: 70, height: 70, mb: 0.5 }}>
+                                    <Box sx={{ position: 'relative', width: 90, height: 90, mb: 1 }}>
                                         <CircularProgress
                                             variant="determinate"
                                             value={100}
-                                            size={70}
+                                            size={90}
                                             thickness={6}
                                             sx={{ color: '#e0e0e0', position: 'absolute', left: 0, top: 0 }}
                                         />
                                         <CircularProgress
                                             variant="determinate"
-                                            value={value}
-                                            size={70}
+                                            value={percent}
+                                            size={90}
                                             thickness={6}
                                             sx={{ color: colors[idx], position: 'absolute', left: 0, top: 0 }}
                                         />
@@ -213,8 +129,8 @@ function Profile() {
                                             position: 'absolute',
                                             left: 0,
                                             top: 0,
-                                            width: 70,
-                                            height: 70,
+                                            width: 90,
+                                            height: 90,
                                             display: 'flex',
                                             alignItems: 'center',
                                             justifyContent: 'center',
@@ -222,9 +138,9 @@ function Profile() {
                                         }}>
                                             <Typography
                                                 variant="h5"
-                                                sx={{ fontWeight: 900, color: '#222', fontSize: '1.3rem' }}
+                                                sx={{ fontWeight: 900, color: '#222', fontSize: '1.5rem', letterSpacing: 0 }}
                                             >
-                                                {solved[idx]}/{total[idx]}
+                                                {solved}/{total}
                                             </Typography>
                                         </Box>
                                     </Box>
@@ -234,7 +150,7 @@ function Profile() {
                     </Box>
                 </Card>
                 {/* Participated Contests Section */}
-                {attendedContests && attendedContests.length > 0 && (
+                {profileData.attendedContests && profileData.attendedContests.length > 0 && (
                     <Card className="profile-section-card" sx={{ flex: 1, mb: 0 }}>
                         <Typography className="profile-section-title">Participated Contests</Typography>
                         <TableContainer className="profile-table-container" component={Paper}>
@@ -248,7 +164,7 @@ function Profile() {
                                     </TableRow>
                                 </TableHead>
                                 <TableBody>
-                                    {attendedContests.map((contest, idx) => (
+                                    {profileData.attendedContests.map((contest, idx) => (
                                         <TableRow key={contest._id}>
                                             <TableCell>{idx + 1}</TableCell>
                                             <TableCell>
@@ -265,7 +181,7 @@ function Profile() {
                 )}
             </Box>
             {/* Contests Created By User Section */}
-            {createdContests && createdContests.length > 0 && (
+            {profileData.createdContests && profileData.createdContests.length > 0 && (
                 <Card className="profile-section-card">
                     <Typography className="profile-section-title">Contests You Created</Typography>
                     <TableContainer className="profile-table-container" component={Paper}>
@@ -281,7 +197,7 @@ function Profile() {
                                 </TableRow>
                             </TableHead>
                             <TableBody>
-                                {createdContests.map((contest, idx) => {
+                                {profileData.createdContests.map((contest, idx) => {
                                     const now = new Date();
                                     const start = new Date(contest.startTime);
                                     const canEdit = start > now;
@@ -296,13 +212,13 @@ function Profile() {
                                             <TableCell>{contest.problems ? contest.problems.length : 0}</TableCell>
                                             <TableCell>
                                                 {canEdit && (
-                                                    <Tooltip title="Edit" arrow>
-                                                        <button className="profile-action-btn" onClick={() => navigate(`/contests/${contest._id}/edit`)}><EditIcon fontSize="small" /></button>
-                                                    </Tooltip>
+                                                    <Button variant="outlined" size="small" onClick={() => navigate(`/contests/${contest._id}/edit`)} style={{ minWidth: 0, padding: '2px 10px', marginRight: 6, borderColor: '#ffa116', color: '#ffa116', fontWeight: 600, background: 'linear-gradient(135deg, #fffbe6 0%, #fff3e0 100%)' }}>
+                                                        Edit
+                                                    </Button>
                                                 )}
-                                                <Tooltip title="Delete" arrow>
-                                                    <button className="profile-action-btn" onClick={() => handleDeleteContest(contest._id)}><DeleteIcon fontSize="small" /></button>
-                                                </Tooltip>
+                                                <Button variant="outlined" size="small" color="error" onClick={() => handleDeleteContest(contest._id)} style={{ minWidth: 0, padding: '2px 10px', borderColor: '#f44336', color: '#f44336', fontWeight: 600, background: 'linear-gradient(135deg, #fff0f0 0%, #ffeaea 100%)' }}>
+                                                    Delete
+                                                </Button>
                                             </TableCell>
                                         </TableRow>
                                     );
@@ -313,7 +229,7 @@ function Profile() {
                 </Card>
             )}
             {/* Problems You Created Section */}
-            {user && user.role === 'admin' && (
+            {profileData.user && profileData.user.role === 'admin' && (
                 <Card className="profile-section-card">
                     <Typography className="profile-section-title">Problems You Created</Typography>
                     <TableContainer className="profile-table-container" component={Paper}>
@@ -327,19 +243,19 @@ function Profile() {
                                 </TableRow>
                             </TableHead>
                             <TableBody>
-                                {problemsByUser && problemsByUser.length > 0 ? (
-                                    problemsByUser.map((problem, idx) => (
+                                {profileData.problemsByUser && profileData.problemsByUser.length > 0 ? (
+                                    profileData.problemsByUser.map((problem, idx) => (
                                         <TableRow key={problem._id}>
                                             <TableCell>{idx + 1}</TableCell>
                                             <TableCell>{problem.problemName}</TableCell>
                                             <TableCell>{formatFormalDate(problem.CreatedAt)}</TableCell>
                                             <TableCell>
-                                                <Tooltip title="Edit" arrow>
-                                                    <Link to={`/problems/${problem._id}/edit`} style={{ color: '#1976d2', marginRight: 12 }}><EditIcon fontSize="small" /></Link>
-                                                </Tooltip>
-                                                <Tooltip title="Delete" arrow>
-                                                    <button className="profile-action-btn" onClick={() => handleDeleteProblem(problem._id)}><DeleteIcon fontSize="small" /></button>
-                                                </Tooltip>
+                                                <Button variant="outlined" size="small" component={Link} to={`/problems/${problem._id}/edit`} style={{ minWidth: 0, padding: '2px 10px', marginRight: 6, borderColor: '#1976d2', color: '#1976d2', fontWeight: 600, background: 'linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%)' }}>
+                                                    Edit
+                                                </Button>
+                                                <Button variant="outlined" size="small" color="error" onClick={() => handleDeleteProblem(problem._id)} style={{ minWidth: 0, padding: '2px 10px', borderColor: '#f44336', color: '#f44336', fontWeight: 600, background: 'linear-gradient(135deg, #fff0f0 0%, #ffeaea 100%)' }}>
+                                                    Delete
+                                                </Button>
                                             </TableCell>
                                         </TableRow>
                                     ))
@@ -369,8 +285,8 @@ function Profile() {
                             </TableRow>
                         </TableHead>
                         <TableBody>
-                            {submissionsByUser && submissionsByUser.length > 0 ? (
-                                submissionsByUser.map((submission, index) => {
+                            {profileData.submissionsByUser && profileData.submissionsByUser.length > 0 ? (
+                                profileData.submissionsByUser.map((submission, index) => {
                                     if (!submission || !submission._id || !submission.problem_id) return null;
                                     return (
                                         <TableRow key={submission._id}>
@@ -384,7 +300,9 @@ function Profile() {
                                             <TableCell>{submission.verdict}</TableCell>
                                             <TableCell>{formatFormalDate(submission.submittedAt)}</TableCell>
                                             <TableCell>
-                                                <Link to={`/submission/${submission._id}`} className="view-code-link" style={{ color: '#ffffff', fontWeight: 600 }}>View Code</Link>
+                                                <Button variant="outlined" size="small" component={Link} to={`/submission/${submission._id}`} style={{ minWidth: 0, padding: '2px 10px', fontWeight: 600, borderColor: '#43a047', color: '#43a047', background: 'linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%)' }}>
+                                                    View Code
+                                                </Button>
                                             </TableCell>
                                         </TableRow>
                                     );

@@ -2,6 +2,7 @@ import { useParams, Link, useLocation } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import axios from 'axios';
 import './ProblemSubmissions.css';
+import CircularProgress from '@mui/material/CircularProgress';
 
 function formatFormalDate(dateStr) {
   const date = new Date(dateStr);
@@ -46,7 +47,7 @@ function SubmissionCodeView() {
     fetchSubmission();
   }, [id]);
 
-  if (loading) return <div className="problem-submissions"><p>Loading...</p></div>;
+  if (loading) return <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '40vh' }}><CircularProgress size={60} thickness={5} /></div>;
   if (error) {
     let displayMsg = error;
     if (error === 'Submission not found') {

@@ -17,6 +17,9 @@ const {SubmissionRouter} = require("./Routes/SubmissionRoute.js");
 const ContestRoute = require("./Routes/ContestRoute.js");
 const AdminRoute = require("./Routes/AdminRoute.js");
 const AIRoute = require("./Routes/AIRoute.js");
+const Problem = require("./Models/Problems.js");
+const Submission = require("./Models/Submissions.js");
+const Contest = require("./Models/Contests.js");
 
 const cors = require("cors");
 
@@ -75,6 +78,94 @@ app.use("/submissions", SubmissionRouter);
 app.use("/contests", ContestRoute);
 
 app.use("/admin", AdminRoute);
+
+app.get('/api/profile/summary', async (req, res) => {
+  try {
+    if (!req.user) return res.status(401).json({ error: 'Unauthorized' });
+    const userId = req.user._id;
+    const userRole = req.user.role;
+
+    // Fetch all problems
+    const problems = await Problem.find({});
+    // Fetch last 20 submissions by user
+    const submissionsByUser = await Submission.find({ user_id: userId })
+      .sort({ submittedAt: -1 })
+      .limit(20)
+      .populate('problem_id');
+
+    // Solved stats
+    const solvedSet = new Set();
+    submissionsByUser.forEach(sub => {
+      if (sub.verdict === 'Accepted' && sub.problem_id && sub.problem_id._id) {
+        solvedSet.add(sub.problem_id._id.toString());
+      }
+    });
+    let solvedStats = { easy: 0, medium: 0, hard: 0, total: 0 };
+    let problemTotals = { easy: 0, medium: 0, hard: 0 };
+    problems.forEach(prob => {
+      if (!prob || !prob._id) return;
+      if (prob.difficulty === 'easy') problemTotals.easy++;
+      else if (prob.difficulty === 'medium') problemTotals.medium++;
+      else if (prob.difficulty === 'hard') problemTotals.hard++;
+      if (solvedSet.has(prob._id.toString())) {
+        if (prob.difficulty === 'easy') solvedStats.easy++;
+        else if (prob.difficulty === 'medium') solvedStats.medium++;
+        else if (prob.difficulty === 'hard') solvedStats.hard++;
+        solvedStats.total++;
+      }
+    });
+
+    // Problems created by user (if admin)
+    let problemsByUser = [];
+    if (userRole === 'admin') {
+      problemsByUser = await Problem.find({ CreatedBy: userId });
+    }
+
+    // Contests created by user
+    const createdContests = await Contest.find({ createdBy: userId });
+
+    // Contests attended by user (with rank, points, solvedProblems)
+    const allContests = await Contest.find({ 'leaderBoard.user_id': userId });
+    const attendedContests = allContests.map(contest => {
+      // Find user entry in leaderboard
+      const sorted = [...contest.leaderBoard].sort((a, b) => {
+        if (b.points !== a.points) return b.points - a.points;
+        if (!a.lastSubmission) return 1;
+        if (!b.lastSubmission) return -1;
+        return new Date(a.lastSubmission) - new Date(b.lastSubmission);
+      });
+      const idx = sorted.findIndex(e => e.user_id && e.user_id.toString() === userId.toString());
+      let userStats = null;
+      if (idx !== -1) {
+        const entry = sorted[idx];
+        userStats = {
+          rank: idx + 1,
+          points: entry.points,
+          solvedProblems: entry.solvedProblems ? entry.solvedProblems.length : 0,
+        };
+      }
+      return {
+        _id: contest._id,
+        contestTitle: contest.contestTitle,
+        startTime: contest.startTime,
+        userStats,
+      };
+    });
+
+    res.json({
+      user: req.user,
+      solvedStats,
+      problemTotals,
+      problemsByUser,
+      submissionsByUser,
+      createdContests,
+      attendedContests,
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
 
 app.listen(port, () => {
     console.log(`Server is listening on port ${port}`);

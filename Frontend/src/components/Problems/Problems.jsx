@@ -5,6 +5,13 @@ import './Problems.css';
 import { useAuth } from "../../contexts/AuthContext";
 import CircularProgress from '@mui/material/CircularProgress';
 import ProblemFilters from './ProblemFilters';
+import { 
+  CheckCircle as CheckCircleIcon,
+  Code as CodeIcon,
+  TrendingUp as TrendingUpIcon,
+  Label as LabelIcon,
+  Assignment as AssignmentIcon
+} from '@mui/icons-material';
 
 const DIFFICULTY_ORDER = { easy: 1, medium: 2, hard: 3 };
 
@@ -97,64 +104,87 @@ function Problems() {
 
     return (
         <div className="problems">
-            <ProblemFilters
-                problems={problems}
-                solvedSet={solvedSet}
-                selectedTopic={selectedTopic}
-                setSelectedTopic={setSelectedTopic}
-                selectedDifficulty={selectedDifficulty}
-                setSelectedDifficulty={setSelectedDifficulty}
-            />
-            {loading && (
+            {loading ? (
                 <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '40vh' }}>
                     <CircularProgress size={60} thickness={5} />
                 </div>
-            )}
-            {!loading && error && <p style={{ color: 'red', textAlign: 'center' }}>{error}</p>}
-            {!loading && success && !error && <p style={{ color: 'green', textAlign: 'center' }}>{success}</p>}
-            {!loading && !error && filteredProblems.length > 0 && (
-                <table>
-                    <thead>
-                        <tr>
-                            <th style={{ paddingRight: 32 }}>S.No</th>
-                            <th style={{ paddingRight: 32 }}>Problem Name</th>
-                            <th style={{ paddingRight: 32 }}>Difficulty</th>
-                            <th style={{ paddingRight: 32 }}>Topics</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {filteredProblems.map((p, index) => {
-                            const isSolved = solvedSet.has(p._id?.toString());
-                            return (
-                                <tr key={index} className={isSolved ? 'solved-problem-row' : ''}>
-                                    <td style={{ paddingRight: 32 }}>{index + 1}</td>
-                                    <td style={{ paddingRight: 32 }}>
-                                        <div className="problem-name-cell">
-                                            <Link to={`/problem/${p._id}/description`} className={isSolved ? 'solved-problem-link' : ''}>{p.problemName}</Link>
-                                            {isSolved && (
-                                                <span title="Solved" className="solved-tick" style={{ display: 'inline-flex', alignItems: 'center', marginLeft: 6 }}>
-                                                    <span style={{ display: 'inline-block', width: 20, height: 20, borderRadius: '50%', background: '#43a047', color: '#fff', fontWeight: 700, fontSize: 15, lineHeight: '20px', textAlign: 'center' }}>✓</span>
-                                                </span>
-                                            )}
-                                        </div>
-                                    </td>
-                                    <td style={{ paddingRight: 32 }}>
-                                        <span className={`difficulty-box ${p.difficulty?.toLowerCase()}`}>{p.difficulty}</span>
-                                    </td>
-                                    <td style={{ paddingRight: 32 }}>
-                                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
-                                            {Array.isArray(p.topics)
-                                                ? p.topics.map((topic, i) => (
-                                                    <span key={i} className="topic-tag">{topic}</span>
-                                                ))
-                                                : p.topics && <span className="topic-tag">{p.topics}</span>}
-                                        </div>
-                                    </td>
+            ) : (
+                <>
+                    <ProblemFilters
+                        problems={problems}
+                        solvedSet={solvedSet}
+                        selectedTopic={selectedTopic}
+                        setSelectedTopic={setSelectedTopic}
+                        selectedDifficulty={selectedDifficulty}
+                        setSelectedDifficulty={setSelectedDifficulty}
+                    />
+                    {error && <p style={{ color: 'red', textAlign: 'center' }}>{error}</p>}
+                    {success && !error && <p style={{ color: 'green', textAlign: 'center' }}>{success}</p>}
+                    {filteredProblems.length > 0 && (
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th style={{ paddingRight: 32 }}>
+                                        <span className="th-content">
+                                            <AssignmentIcon />
+                                            S.No
+                                        </span>
+                                    </th>
+                                    <th style={{ paddingRight: 32 }}>
+                                        <span className="th-content">
+                                            <CodeIcon />
+                                            Problem Name
+                                        </span>
+                                    </th>
+                                    <th style={{ paddingRight: 32 }}>
+                                        <span className="th-content">
+                                            <TrendingUpIcon />
+                                            Difficulty
+                                        </span>
+                                    </th>
+                                    <th style={{ paddingRight: 32 }}>
+                                        <span className="th-content">
+                                            <LabelIcon />
+                                            Topics
+                                        </span>
+                                    </th>
                                 </tr>
-                            );
-                        })}
-                    </tbody>
-                </table>
+                            </thead>
+                            <tbody>
+                                {filteredProblems.map((p, index) => {
+                                    const isSolved = solvedSet.has(p._id?.toString());
+                                    return (
+                                        <tr key={index} className={isSolved ? 'solved-problem-row' : ''}>
+                                            <td style={{ paddingRight: 32 }}>{index + 1}</td>
+                                            <td style={{ paddingRight: 32 }}>
+                                                <div className="problem-name-cell">
+                                                    <Link to={`/problem/${p._id}/description`} className={isSolved ? 'solved-problem-link' : ''}>{p.problemName}</Link>
+                                                    {isSolved && (
+                                                        <span title="Solved" className="solved-tick" style={{ display: 'inline-flex', alignItems: 'center', marginLeft: 6 }}>
+                                                            <CheckCircleIcon style={{ color: '#43a047', fontSize: '1.2rem' }} />
+                                                        </span>
+                                                    )}
+                                                </div>
+                                            </td>
+                                            <td style={{ paddingRight: 32 }}>
+                                                <span className={`difficulty-box ${p.difficulty?.toLowerCase()}`}>{p.difficulty}</span>
+                                            </td>
+                                            <td style={{ paddingRight: 32 }}>
+                                                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
+                                                    {Array.isArray(p.topics)
+                                                        ? p.topics.map((topic, i) => (
+                                                            <span key={i} className="topic-tag">{topic}</span>
+                                                        ))
+                                                        : p.topics && <span className="topic-tag">{p.topics}</span>}
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    );
+                                })}
+                            </tbody>
+                        </table>
+                    )}
+                </>
             )}
         </div>
     );

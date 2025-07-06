@@ -145,10 +145,9 @@ body, .profile-root {
   border-bottom: none;
 }
 
-.profile-table tr:hover {
+.profile-table tbody tr:hover {
   background: #fffbe7;
-  transform: scale(1.01);
-  transition: background 0.2s, transform 0.2s;
+  transition: background 0.2s;
 }
 
 .profile-action-btn {

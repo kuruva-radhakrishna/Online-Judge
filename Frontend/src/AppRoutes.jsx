@@ -23,20 +23,15 @@ import ContestProblemView from './components/Contests/ContestProblemView';
 import ContestProblemDescription from './components/Contests/ContestProblemDescription';
 import ContestProblemSubmissions from './components/Contests/ContestProblemSubmissions';
 import EditContest from './components/Contests/EditContest';
-
-function ProtectedRoute({ children }) {
-  const { user, loading } = useAuth();
-  const location = useLocation();
-  if (loading) return null; // or a loading spinner
-  if (!user) return <Navigate to="/login" state={{ from: location }} replace />;
-  return children;
-}
+import ProtectedRoute from './components/ProtectedRoute';
+import AIChat from './components/AIChat/AIChat';
 
 function AppRoutes() {
   // Always show Nav
   return (
     <>
       <Nav />
+      <ProtectedRoute><AIChat /></ProtectedRoute>
       <div style={{ position: 'relative', minHeight: '100vh' }}>
         <Routes>
           <Route path="/" element={<Home />} />
@@ -62,16 +57,40 @@ function AppRoutes() {
             <Route path="submissions" element={<ProblemSubmissions />} />
             <Route path="discussions" element={<ProblemDiscussion />} />
           </Route>
-          <Route path="/problems/:id/edit" element={<EditProblem />} />
-          <Route path='/contests' element={<Contests />} />
-          <Route path='/contests/:id/*' element={<ContestView />} >
+          <Route path="/problems/:id/edit" element={
+            <ProtectedRoute>
+              <EditProblem />
+            </ProtectedRoute>
+          } />
+          <Route path='/contests' element={
+            <ProtectedRoute>
+              <Contests />
+            </ProtectedRoute>
+          } />
+          <Route path='/contests/:id/*' element={
+            <ProtectedRoute>
+              <ContestView />
+            </ProtectedRoute>
+          } >
             <Route path='leaderboard' element={<ContestLeaderBoard />} />
             <Route path='submissions' element={<ContestSubmissions />} />
             <Route path='discussions' element={<ContestDiscussions />} />
           </Route>
-          <Route path="/submission/:id" element={<SubmissionCodeView />} />
-          <Route path='/profile' element = {<Profile />} />
-          <Route path='/contests/:id' element={<ContestViewWrapper />} />
+          <Route path="/submission/:id" element={
+            <ProtectedRoute>
+              <SubmissionCodeView />
+            </ProtectedRoute>
+          } />
+          <Route path='/profile' element={
+            <ProtectedRoute>
+              <Profile />
+            </ProtectedRoute>
+          } />
+          <Route path='/contests/:id' element={
+            <ProtectedRoute>
+              <ContestViewWrapper />
+            </ProtectedRoute>
+          } />
           <Route path="/contests/:contestId/problem/:problemId/*" element={
             <ProtectedRoute>
               <ContestProblemView />
@@ -85,7 +104,11 @@ function AppRoutes() {
               <Problem />
             </ProtectedRoute>
           } />
-          <Route path="/contests/new" element={<NewContest />} />
+          <Route path="/contests/new" element={
+            <ProtectedRoute>
+              <NewContest />
+            </ProtectedRoute>
+          } />
           <Route path="/contests/:id/edit" element={
             <ProtectedRoute>
               <EditContest />

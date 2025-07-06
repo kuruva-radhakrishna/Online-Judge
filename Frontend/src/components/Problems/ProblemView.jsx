@@ -13,10 +13,7 @@ import ProblemDiscussion from "./ProblemDiscussion";
 import CircularProgress from '@mui/material/CircularProgress';
 
 function Problem(props) {
-    // Support contestId from props, route params, or location state
     const params = useParams();
-    const location = useLocation();
-    const contestId = props.contestId || params.contestId || (location.state && location.state.contestId);
     const problemId = props.problemId || params.problemId || params.id;
     const [problem, setProblem] = useState();
     const [language, setLanguage] = useState('cpp');
@@ -30,43 +27,11 @@ function Problem(props) {
     const [aiReviewClicked, setAIReviewClicked] = useState(false);
     const [debugResult, setDebugResult] = useState('');
     const [debugLoading, setDebugLoading] = useState(false);
-    const [contest, setContest] = useState(null);
-    const [contestStatus, setContestStatus] = useState(null); // 'future', 'ongoing', 'past', null
-    const [now, setNow] = useState(new Date());
     const Navigate = useNavigate();
-    const [timerString, setTimerString] = useState("");
     const [tab, setTab] = useState('description');
     const [runLoading, setRunLoading] = useState(false);
     const [submitLoading, setSubmitLoading] = useState(false);
     const [showFailedCase, setShowFailedCase] = useState(true);
-
-    // Fetch contest if contestId is present
-    useEffect(() => {
-        if (!contestId) return;
-        async function fetchContest() {
-            try {
-                const res = await axios.get(`http://localhost:3000/contests/${contestId}`, { withCredentials: true });
-                setContest(res.data);
-                console.log(res.data);
-                const start = new Date(res.data.startTime);
-                const end = new Date(res.data.endTime);
-                const isOngoing = now >= start && now < end;
-                // Check if this problem is part of the contest
-                const isInContest = res.data.problems.some(
-                    (p) => (p.problem_id._id || p.problem_id) === problemId
-                );
-                if (isOngoing && isInContest) setContestStatus("ongoing");
-                else if (now < start && isInContest) setContestStatus("future");
-                else if (now >= end && isInContest) setContestStatus("past");
-                else setContestStatus(null); // Not in contest
-            } catch (err) {
-                setContestStatus(null);
-            }
-        }
-        fetchContest();
-        const timer = setInterval(() => setNow(new Date()), 1000);
-        return () => clearInterval(timer);
-    }, [contestId, now, problemId]);
 
     useEffect(() => {
         switch (language) {
@@ -91,13 +56,7 @@ function Problem(props) {
                 withCredentials: true
             });
             if (result && result.data) {
-                let filtered = result.data;
-                if (contestId && contestStatus === "ongoing") {
-                    filtered = filtered.filter(
-                        (sub) => sub.contest_id && sub.contest_id === contestId
-                    );
-                }
-                setSubmissions(filtered);
+                setSubmissions(result.data);
             } else {
                 setSubmissions([]);
             }
@@ -128,24 +87,6 @@ function Problem(props) {
         fetchSubmissions();
     }, [problemId, Navigate]);
 
-    useEffect(() => {
-        if (contestStatus === "ongoing" && contest && contest.endTime) {
-            const updateTimer = () => {
-                const diff = new Date(contest.endTime) - new Date();
-                if (diff <= 0) setTimerString("00:00:00");
-                else {
-                    const h = String(Math.floor(diff / 3600000)).padStart(2, "0");
-                    const m = String(Math.floor((diff % 3600000) / 60000)).padStart(2, "0");
-                    const s = String(Math.floor((diff % 60000) / 1000)).padStart(2, "0");
-                    setTimerString(`${h}:${m}:${s}`);
-                }
-            };
-            updateTimer();
-            const interval = setInterval(updateTimer, 1000);
-            return () => clearInterval(interval);
-        }
-    }, [contestStatus, contest]);
-
     if (!problem) {
         return <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '40vh' }}><CircularProgress size={60} thickness={5} /></div>;
     }
@@ -173,26 +114,14 @@ function Problem(props) {
     const handleSubmit = async () => {
         setSubmitLoading(true);
         try {
-            let url, payload;
-            if (contestId && contestStatus === "ongoing") {
-                url = `http://localhost:3000/contests/submission/${contestId}/${problemId}`;
-                payload = {
-                    submission: {
-                        language,
-                        code,
-                    }
-                };
-            } else {
-                url = `http://localhost:3000/submissions/${problemId}`;
-                payload = {
-                    problem_id: problemId,
-                    language,
-                    code,
-                };
-            }
+            const url = `http://localhost:3000/submissions/${problemId}`;
+            const payload = {
+                problem_id: problemId,
+                language,
+                code,
+            };
             const result = await axios.post(url, payload, { withCredentials: true });
             setVerdicts(result.data.verdicts);
-            console.log('verdicts:', result.data);
             setFailedCase(result.data.failedCase || null);
             setShowFailedCase(true);
             fetchSubmissions();
@@ -230,118 +159,6 @@ function Problem(props) {
         setDebugLoading(false);
     };
 
-    // Contest logic: if contestId is present
-    if (contestId) {
-        if (contestStatus === "future") {
-            return <div className="problem-view"><h2>Contest has not started yet.</h2></div>;
-        }
-        if (contestStatus === "notfound") {
-            return <div className="problem-view"><h2>Contest not found.</h2></div>;
-        }
-        // Ongoing: show timer, hide AI buttons, use contest submit route
-        if (contestStatus === "ongoing") {
-            return (
-                <div className="problem-view" style={{ position: 'relative' }}>
-                    <div className="contest-timer-topright">
-                        <span role="img" aria-label="stopwatch" className="timer-icon">⏱️</span>
-                        <span className="timer-value">{timerString}</span>
-                        <span className="timer-label">left</span>
-                    </div>
-                    <div className="row" style={{ display: "flex" }}>
-                        <div className="problem" style={{ width: "50%" }}>
-                            <div style={{ marginBottom: "1rem" }}>
-                                <Link to={`/contests/${contestId}/problem/${problemId}/description`}><button>Description</button></Link>
-                                <Link to={`/contests/${contestId}/problem/${problemId}/submissions`}><button>Submissions</button></Link>
-                            </div>
-                            <Routes>
-                                <Route path="description" element={<ProblemDescription />} />
-                                <Route path="submissions" element={<ProblemSubmissions submissions={submissions} refreshSubmissions={fetchSubmissions} />} />
-                            </Routes>
-                        </div>
-                        <div className="solution" style={{ width: "50%" }}>
-                            <select
-                                name="language"
-                                value={language}
-                                onChange={e => setLanguage(e.target.value)}
-                                className="language-select"
-                            >
-                                <option value="cpp">C++</option>
-                                <option value="java">Java</option>
-                                <option value="python">Python</option>
-                            </select>
-                            <CodeEditor value={code} onChange={setCode} language={language} />
-                            <Box display="flex" gap={2} mt={2} justifyContent="space-between">
-                                <div style={{ display: 'flex', gap: 16 }}>
-                                    <button onClick={handleRun} className="ai-review-btn" disabled={runLoading}>
-                                        {runLoading ? (
-                                            <span style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                                                <CircularProgress size={18} style={{ color: '#fff' }} />
-                                                Running...
-                                            </span>
-                                        ) : '▶️ Run'}
-                                    </button>
-                                    <button onClick={handleSubmit} className="submit-btn" disabled={submitLoading}>
-                                        {submitLoading ? (
-                                            <span style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                                                <CircularProgress size={18} style={{ color: '#fff' }} />
-                                                Submitting...
-                                            </span>
-                                        ) : '📤 Submit'}
-                                    </button>
-                                </div>
-                            </Box>
-                            {failedCase && showFailedCase && (
-                              <div style={{
-                                background: '#f8fafd',
-                                border: '1.5px solid #e0e0e0',
-                                borderRadius: 10,
-                                marginTop: 12,
-                                marginBottom: 18,
-                                padding: '16px 18px 10px 18px',
-                                color: '#222',
-                                fontSize: '1.05rem',
-                                width: '100%',
-                                maxWidth: '100%',
-                                position: 'relative',
-                                boxShadow: '0 2px 8px rgba(25, 118, 210, 0.07)'
-                              }}>
-                                <button onClick={() => setShowFailedCase(false)} style={{
-                                  position: 'absolute', top: 8, right: 12,
-                                  background: '#ffa116', border: '1.5px solid #e57373',
-                                  borderRadius: '50%', width: 28, height: 28,
-                                  fontSize: 18, color: '#fff', cursor: 'pointer', fontWeight: 700,
-                                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                  boxShadow: '0 1px 4px rgba(0,0,0,0.08)'
-                                }} title="Close">×</button>
-                                <b>Failed Test Case:</b>
-                                <div style={{ marginTop: 8, marginBottom: 6 }}>
-                                  <b>Input:</b>
-                                  <pre style={{ background: '#f5f7fa', borderRadius: 6, padding: 8, margin: 0, overflowX: 'auto', maxWidth: '100%' }}>{failedCase.input}</pre>
-                                </div>
-                                <div style={{ marginBottom: 6 }}>
-                                  <b>Expected Output:</b>
-                                  <pre style={{ background: '#f5f7fa', borderRadius: 6, padding: 8, margin: 0, overflowX: 'auto', maxWidth: '100%' }}>{failedCase.expectedOutput || failedCase.expected}</pre>
-                                </div>
-                                <div>
-                                  <b>Your Output:</b>
-                                  <pre style={{ background: '#f5f7fa', borderRadius: 6, padding: 8, margin: 0, overflowX: 'auto', maxWidth: '100%' }}>{failedCase.actualOutput || failedCase.actual}</pre>
-                                </div>
-                              </div>
-                            )}
-                            <InputOutputConsole inputValue={input} onInputChange={e => setInput(e.target.value)} outputValue={output} isOutput={true} />
-                            <Verdict verdicts={verdicts} />
-                        </div>
-                    </div>
-                </div>
-            );
-        }
-        // Past: show normal problem view (with AI buttons)
-        if (contestStatus === "past") {
-            // fall through to normal rendering below
-        }
-    }
-
-    // Normal or contest past view
     return (
         <div className="problem-view">
             <div className="row" style={{ display: "flex" }}>
@@ -393,42 +210,42 @@ function Problem(props) {
                         </div>
                     </Box>
                     {failedCase && showFailedCase && (
-                      <div style={{
-                        background: '#f8fafd',
-                        border: '1.5px solid #e0e0e0',
-                        borderRadius: 10,
-                        marginTop: 12,
-                        marginBottom: 18,
-                        padding: '16px 18px 10px 18px',
-                        color: '#222',
-                        fontSize: '1.05rem',
-                        width: '100%',
-                        maxWidth: '100%',
-                        position: 'relative',
-                        boxShadow: '0 2px 8px rgba(25, 118, 210, 0.07)'
-                      }}>
-                        <button onClick={() => setShowFailedCase(false)} style={{
-                          position: 'absolute', top: 8, right: 12,
-                          background: '#ffa116', border: '1.5px solid #e57373',
-                          borderRadius: '50%', width: 28, height: 28,
-                          fontSize: 18, color: '#fff', cursor: 'pointer', fontWeight: 700,
-                          display: 'flex', alignItems: 'center', justifyContent: 'center',
-                          boxShadow: '0 1px 4px rgba(0,0,0,0.08)'
-                        }} title="Close">×</button>
-                        <b>Failed Test Case:</b>
-                        <div style={{ marginTop: 8, marginBottom: 6 }}>
-                          <b>Input:</b>
-                          <pre style={{ background: '#f5f7fa', borderRadius: 6, padding: 8, margin: 0, overflowX: 'auto', maxWidth: '100%' }}>{failedCase.input}</pre>
+                        <div style={{
+                            background: '#f8fafd',
+                            border: '1.5px solid #e0e0e0',
+                            borderRadius: 10,
+                            marginTop: 12,
+                            marginBottom: 18,
+                            padding: '16px 18px 10px 18px',
+                            color: '#222',
+                            fontSize: '1.05rem',
+                            width: '100%',
+                            maxWidth: '100%',
+                            position: 'relative',
+                            boxShadow: '0 2px 8px rgba(25, 118, 210, 0.07)'
+                        }}>
+                            <button onClick={() => setShowFailedCase(false)} style={{
+                                position: 'absolute', top: 8, right: 12,
+                                background: '#ffa116', border: '1.5px solid #e57373',
+                                borderRadius: '50%', width: 28, height: 28,
+                                fontSize: 18, color: '#fff', cursor: 'pointer', fontWeight: 700,
+                                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                boxShadow: '0 1px 4px rgba(0,0,0,0.08)'
+                            }} title="Close">×</button>
+                            <b>Failed Test Case:</b>
+                            <div style={{ marginTop: 8, marginBottom: 6 }}>
+                                <b>Input:</b>
+                                <pre style={{ background: '#f5f7fa', borderRadius: 6, padding: 8, margin: 0, overflowX: 'auto', maxWidth: '100%' }}>{failedCase.input}</pre>
+                            </div>
+                            <div style={{ marginBottom: 6 }}>
+                                <b>Expected Output:</b>
+                                <pre style={{ background: '#f5f7fa', borderRadius: 6, padding: 8, margin: 0, overflowX: 'auto', maxWidth: '100%' }}>{failedCase.expectedOutput || failedCase.expected}</pre>
+                            </div>
+                            <div>
+                                <b>Your Output:</b>
+                                <pre style={{ background: '#f5f7fa', borderRadius: 6, padding: 8, margin: 0, overflowX: 'auto', maxWidth: '100%' }}>{failedCase.actualOutput || failedCase.actual}</pre>
+                            </div>
                         </div>
-                        <div style={{ marginBottom: 6 }}>
-                          <b>Expected Output:</b>
-                          <pre style={{ background: '#f5f7fa', borderRadius: 6, padding: 8, margin: 0, overflowX: 'auto', maxWidth: '100%' }}>{failedCase.expectedOutput || failedCase.expected}</pre>
-                        </div>
-                        <div>
-                          <b>Your Output:</b>
-                          <pre style={{ background: '#f5f7fa', borderRadius: 6, padding: 8, margin: 0, overflowX: 'auto', maxWidth: '100%' }}>{failedCase.actualOutput || failedCase.actual}</pre>
-                        </div>
-                      </div>
                     )}
                     {review && (
                         <div className="ai-review-container">

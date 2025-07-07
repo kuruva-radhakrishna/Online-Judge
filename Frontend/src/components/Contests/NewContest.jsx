@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
+
 function NewContest() {
   const [title, setTitle] = useState('');
   const [startTime, setStartTime] = useState('');
@@ -17,7 +19,7 @@ function NewContest() {
   useEffect(() => {
     async function fetchProblems() {
       try {
-        const res = await axios.get('http://localhost:3000/problems/all', { withCredentials: true });
+        const res = await axios.get(`${BACKEND_URL}/problems/all`, { withCredentials: true });
         setAllProblems(res.data || []);
       } catch (err) {
         setAllProblems([]);
@@ -64,7 +66,7 @@ function NewContest() {
       return;
     }
     try {
-      await axios.post('http://localhost:3000/contests/new', {
+      await axios.post(`${BACKEND_URL}/contests/new`, {
         contestTitle: title,
         startTime,
         endTime,
@@ -81,7 +83,7 @@ function NewContest() {
     setAiLoading(true);
     setError('');
     try {
-      const res = await axios.post('http://localhost:3000/ai/contest-description', {
+      const res = await axios.post(`${BACKEND_URL}/ai/contest-description`, {
         contestTitle: title,
         problems: selectedProblems,
       }, { withCredentials: true });

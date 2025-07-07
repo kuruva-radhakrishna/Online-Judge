@@ -13,6 +13,8 @@ import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
 import ForumIcon from '@mui/icons-material/Forum';
 import './AIChat.css';
 
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
+
 const AIChat = () => {
   const { user } = useAuth();
   const [messages, setMessages] = useState([]);
@@ -90,7 +92,7 @@ const AIChat = () => {
     setIsLoading(true);
 
     try {
-      const response = await axios.post('http://localhost:3000/ai/chat', {
+      const response = await axios.post(`${BACKEND_URL}/ai/chat`, {
         message: inputMessage,
         chatHistory: [...chatHistory, { role: 'user', content: inputMessage }].slice(-MAX_HISTORY)
       }, { withCredentials: true });

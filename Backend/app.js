@@ -23,9 +23,14 @@ const Contest = require("./Models/Contests.js");
 
 const cors = require("cors");
 
+const allowedOrigins = [
+  process.env.FRONTEND_URL,
+  process.env.FRONTEND_URL_LOCAL
+].filter(Boolean);
+
 app.use(cors({
-  origin: 'http://localhost:5173', // ✅ must match your frontend
-  credentials: true                // ✅ allow cookies (sessions)
+  origin: allowedOrigins,
+  credentials: true
 }));
 
 // const data = async function (){
@@ -165,6 +170,13 @@ app.get('/api/profile/summary', async (req, res) => {
     console.error(err);
     res.status(500).json({ error: 'Server error' });
   }
+});
+
+app.get('/debug/session', (req, res) => {
+  res.json({
+    session: req.session,
+    user: req.user
+  });
 });
 
 app.listen(port, () => {

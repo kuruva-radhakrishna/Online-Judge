@@ -21,10 +21,11 @@ import {
 function Nav() {
   const { user, setUser } = useAuth();
   const navigate = useNavigate();
+  const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
 
   const handleLogout = async () => {
     try {
-      await axios.post('http://localhost:3000/logout', {}, { withCredentials: true });
+      await axios.post(`${BACKEND_URL}/logout`, {}, { withCredentials: true });
       setUser(null);
       navigate('/login');
     } catch (err) {
@@ -107,8 +108,8 @@ function Nav() {
             )}
             <Link to="/profile" className="nav-link nav-profile-circle" style={{ textDecoration: 'none' }}>
               {(
-                (user.firstname?.[0] || '').toUpperCase() +
-                (user.lastname?.[0] || '').toUpperCase()
+                (user && user.firstname?.[0] || '').toUpperCase() +
+                (user && user.lastname?.[0] || '').toUpperCase()
               )}
             </Link>
             <Button 

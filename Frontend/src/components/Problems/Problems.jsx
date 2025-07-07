@@ -14,6 +14,7 @@ import {
 } from '@mui/icons-material';
 
 const DIFFICULTY_ORDER = { easy: 1, medium: 2, hard: 3 };
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
 
 function Problems() {
     const [problems, setProblems] = useState([]);
@@ -34,9 +35,10 @@ function Problems() {
             setError("");
             setSuccess("");
             try {
-                const result = await axios.get('http://localhost:3000/problems', {
+                const result = await axios.get(`${BACKEND_URL}/problems`, {
                     withCredentials: true
                 });
+                console.log(result);
                 if (!result || !result.data || result.data.length === 0) {
                     setError("Problems not found.");
                     setProblems([]);
@@ -65,7 +67,7 @@ function Problems() {
         const fetchSubmissions = async () => {
             if (!user) return;
             try {
-                const res = await axios.get('http://localhost:3000/submissions/', { withCredentials: true });
+                const res = await axios.get(`${BACKEND_URL}/submissions/`, { withCredentials: true });
                 setSubmissions(res.data || []);
             } catch (err) {
                 setSubmissions([]);

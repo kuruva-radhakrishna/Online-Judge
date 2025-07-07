@@ -20,6 +20,8 @@ function NewProblem() {
   const [submitting, setSubmitting] = useState(false);
   const [aiLoading, setAiLoading] = useState(false);
 
+  const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
+
   if (loading) {
     return <div>Loading...</div>;
   }
@@ -48,7 +50,7 @@ function NewProblem() {
     setSubmitting(true);
     setMessage('');
     try {
-      const res = await axios.post('http://localhost:3000/admin/problems/new', {
+      const res = await axios.post(`${BACKEND_URL}/admin/problems/new`, {
         problem: {
           problemName,
           problemDescription,
@@ -71,7 +73,7 @@ function NewProblem() {
     setMessage('');
     setAiLoading(true);
     try {
-      const result = await axios.post('http://localhost:3000/ai/createProblem', {
+      const result = await axios.post(`${BACKEND_URL}/ai/createProblem`, {
         problem: {
           problemName,
           problemDescription,

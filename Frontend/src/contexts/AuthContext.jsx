@@ -4,6 +4,8 @@ import axios from 'axios';
 
 const AuthContext = createContext();
 
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
+
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -12,7 +14,7 @@ export function AuthProvider({ children }) {
     // Check if user is authenticated on mount
     const checkAuth = async () => {
       try {
-        const res = await axios.get('http://localhost:3000/auth/check', { withCredentials: true });
+        const res = await axios.get(`${BACKEND_URL}/auth/check`, { withCredentials: true });
         setUser(res.data.user || null);
       } catch (err) {
         setUser(null);

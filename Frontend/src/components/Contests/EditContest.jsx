@@ -3,6 +3,8 @@ import axios from 'axios';
 import { useNavigate, useParams } from 'react-router-dom';
 import CircularProgress from '@mui/material/CircularProgress';
 
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
+
 function EditContest() {
   const [title, setTitle] = useState('');
   const [startTime, setStartTime] = useState('');
@@ -21,8 +23,8 @@ function EditContest() {
     const fetchContestAndProblems = async function () {
       try {
         console.log(id);
-        const contestRes = await axios.get(`http://localhost:3000/contests/${id}`, { withCredentials: true });
-        const problemsRes = await axios.get('http://localhost:3000/problems/', { withCredentials: true });
+        const contestRes = await axios.get(`${BACKEND_URL}/contests/${id}`, { withCredentials: true });
+        const problemsRes = await axios.get(`${BACKEND_URL}/problems/`, { withCredentials: true });
         console.log(contestRes);
         console.log(problemsRes);
         const contest = contestRes.data;
@@ -94,7 +96,7 @@ function EditContest() {
       return;
     }
     try {
-      await axios.patch(`http://localhost:3000/admin/contest/${id}/update`, {
+      await axios.patch(`${BACKEND_URL}/admin/contest/${id}/update`, {
         contest: {
           contestTitle: title,
           startTime,
@@ -114,7 +116,7 @@ function EditContest() {
     setAiLoading(true);
     setError('');
     try {
-      const res = await axios.post('http://localhost:3000/ai/contest-description', {
+      const res = await axios.post(`${BACKEND_URL}/ai/contest-description`, {
         contestTitle: title,
         problems: selectedProblems,
       }, { withCredentials: true });

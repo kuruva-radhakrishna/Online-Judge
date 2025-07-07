@@ -12,6 +12,9 @@ import ReactMarkdown from 'react-markdown';
 import ProblemDiscussion from "./ProblemDiscussion";
 import CircularProgress from '@mui/material/CircularProgress';
 
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
+const COMPILER_URL = import.meta.env.VITE_COMPILER_URL;
+
 function Problem(props) {
     const params = useParams();
     const problemId = props.problemId || params.problemId || params.id;
@@ -52,7 +55,7 @@ function Problem(props) {
     // Fetch submissions
     const fetchSubmissions = async () => {
         try {
-            const result = await axios.get(`http://localhost:3000/submissions/${problemId}`, {
+            const result = await axios.get(`${BACKEND_URL}/submissions/${problemId}`, {
                 withCredentials: true
             });
             if (result && result.data) {
@@ -69,7 +72,7 @@ function Problem(props) {
     useEffect(() => {
         const fetchProblem = async () => {
             try {
-                const result = await axios.get(`http://localhost:3000/problems/${problemId}`, {
+                const result = await axios.get(`${BACKEND_URL}/problems/${problemId}`, {
                     withCredentials: true,
                 });
                 if (!result.data) {
@@ -95,7 +98,7 @@ function Problem(props) {
     const handleRun = async () => {
         setRunLoading(true);
         try {
-            const result = await axios.post("http://localhost:8000/run", {
+            const result = await axios.post(`${COMPILER_URL}/run`, {
                 language,
                 code,
                 input
@@ -114,7 +117,7 @@ function Problem(props) {
     const handleSubmit = async () => {
         setSubmitLoading(true);
         try {
-            const url = `http://localhost:3000/submissions/${problemId}`;
+            const url = `${BACKEND_URL}/submissions/${problemId}`;
             const payload = {
                 problem_id: problemId,
                 language,
@@ -134,7 +137,7 @@ function Problem(props) {
     const handleAIReview = async () => {
         setAIReviewClicked(true);
         try {
-            const result = await axios.post('http://localhost:3000/ai/review',
+            const result = await axios.post(`${BACKEND_URL}/ai/review`,
                 { code }, { withCredentials: true }
             );
             setReview(result.data.review);
@@ -148,7 +151,7 @@ function Problem(props) {
         setDebugLoading(true);
         setDebugResult('');
         try {
-            const result = await axios.post('http://localhost:3000/ai/debug', {
+            const result = await axios.post(`${BACKEND_URL}/ai/debug`, {
                 code,
                 problemDescription: problem.problemDescription
             }, { withCredentials: true });

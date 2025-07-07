@@ -9,6 +9,8 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import Tooltip from '@mui/material/Tooltip';
 import CircularProgress from '@mui/material/CircularProgress';
 
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
+
 function formatFormalDate(dateStr) {
     const date = new Date(dateStr);
     const day = date.getDate().toString().padStart(2, '0');
@@ -33,7 +35,7 @@ function Profile() {
         const fetchProfile = async () => {
             try {
                 setLoading(true);
-                const res = await axios.get('http://localhost:3000/api/profile/summary', { withCredentials: true });
+                const res = await axios.get(`${BACKEND_URL}/api/profile/summary`, { withCredentials: true });
                 setProfileData(res.data);
             } catch (error) {
                 // handle error

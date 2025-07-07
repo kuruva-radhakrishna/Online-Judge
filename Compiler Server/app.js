@@ -16,8 +16,13 @@ const generateJavaFile = require("./generateJavaFile.js");
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
+const allowedOrigins = [
+  process.env.FRONTEND_URL,
+  process.env.FRONTEND_URL_LOCAL
+].filter(Boolean);
+
 app.use(cors({
-    origin: ['http://localhost:5173', 'http://localhost:3000'],
+    origin: allowedOrigins,
     credentials: true
 }));
 

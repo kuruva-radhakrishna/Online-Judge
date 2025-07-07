@@ -16,6 +16,8 @@ import {
   School as SchoolIcon
 } from '@mui/icons-material';
 
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
+
 function Login() {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
@@ -28,12 +30,13 @@ function Login() {
         e.preventDefault();
         setError("");
         try {
-            const result = await axios.post('http://localhost:3000/login', {
+            const result = await axios.post(`${BACKEND_URL}/login`, {
                 email,
                 password
             }, {
                 withCredentials: true
             });
+            console.log(result);
             setUser(result.data.user);
             setSuccess("Problems loaded successfully!");
             navigate('/');

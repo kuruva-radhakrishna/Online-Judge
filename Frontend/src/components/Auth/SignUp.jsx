@@ -30,6 +30,7 @@ function SignUp() {
     const [success, setSuccess] = useState("");
     const navigate = useNavigate();
     const { setUser } = useAuth();
+    const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
     
     const validateUser = () => {
         if (!firstname || firstname.trim().length < 2) return 'First name must be at least 2 characters.';
@@ -49,11 +50,12 @@ function SignUp() {
             return;
         }
         try {
-            const result =  await axios.post("http://localhost:3000/register",{
+            const result =  await axios.post(`${BACKEND_URL}/register`,{
                 firstname : firstname,
                 lastname : lastname,
                 email : email,
-                password : password
+                password : password,
+                role : "user"
             }, { withCredentials: true });
             setUser(result.data.user);
             setSuccess('Registration successful! Redirecting...');

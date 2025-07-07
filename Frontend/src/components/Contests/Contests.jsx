@@ -5,6 +5,8 @@ import "./Contests.css";
 import { useAuth } from "../../contexts/AuthContext";
 import CircularProgress from '@mui/material/CircularProgress';
 
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
+
 function Contests() {
     const [contests, setContests] = useState([]);
     const [now, setNow] = useState(new Date());
@@ -16,7 +18,7 @@ function Contests() {
         const fetchData = async () => {
             setLoading(true);
             try {
-                const result = await axios.get('http://localhost:3000/contests', {
+                const result = await axios.get(`${BACKEND_URL}/contests`, {
                     withCredentials: true,
                 });
                 setContests(result.data);

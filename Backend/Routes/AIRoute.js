@@ -1,5 +1,5 @@
 require('dotenv').config();
-const express = require('express');
+
 const router = express.Router();
 const { isLoggedIn, isAdmin } = require('../middleware.js');
 const Contest = require('../Models/Contests.js');

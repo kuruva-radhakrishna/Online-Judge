@@ -12,6 +12,9 @@ import '../../App.css';
 import ContestProblemDescription from './ContestProblemDescription';
 import CircularProgress from '@mui/material/CircularProgress';
 
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
+const COMPILER_URL = import.meta.env.VITE_COMPILER_URL;
+
 function ContestProblemView() {
     const { contestId, problemId } = useParams();
     const [contest, setContest] = useState(null);
@@ -29,7 +32,7 @@ function ContestProblemView() {
     useEffect(() => {
         const fetchContest = async function () {
             try {
-                const res = await axios.get(`http://localhost:3000/contests/${contestId}`, { withCredentials: true });
+                const res = await axios.get(`${BACKEND_URL}/contests/${contestId}`, { withCredentials: true });
                 setContest(res.data);
                 const start = new Date(res.data.startTime);
                 const end = new Date(res.data.endTime);
@@ -51,7 +54,7 @@ function ContestProblemView() {
         }
         const fetchProblem = async function () {
             try {
-                const result = await axios.get(`http://localhost:3000/problems/${problemId}`, { withCredentials: true });
+                const result = await axios.get(`${BACKEND_URL}/problems/${problemId}`, { withCredentials: true });
                 if (result.data) {
                     setProblem(result.data);
                     setProblemError(false);
@@ -70,7 +73,7 @@ function ContestProblemView() {
 
     const fetchSubmissions = async () => {
         try {
-            const result = await axios.get(`http://localhost:3000/submissions/${problemId}`, { withCredentials: true });
+            const result = await axios.get(`${BACKEND_URL}/submissions/${problemId}`, { withCredentials: true });
             let filtered = result.data;
             if (contestId && contestStatus === "ongoing") {
                 filtered = filtered.filter(
@@ -116,7 +119,7 @@ function ContestProblemView() {
 
     const handleRun = async () => {
         try {
-            const result = await axios.post("http://localhost:8000/run", {
+            const result = await axios.post(`${COMPILER_URL}/run`, {
                 language,
                 code,
                 input
@@ -133,7 +136,7 @@ function ContestProblemView() {
     };
     const handleSubmit = async () => {
         try {
-            const url = `http://localhost:3000/contests/submission/${contestId}/${problemId}`;
+            const url = `${BACKEND_URL}/contests/submission/${contestId}/${problemId}`;
             const payload = {
                 submission: {
                     language,

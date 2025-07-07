@@ -6,6 +6,8 @@ import './ProblemDescription.css';
 import ReactMarkdown from 'react-markdown';
 import CircularProgress from '@mui/material/CircularProgress';
 
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
+
 function ProblemDescription() {
     const { id } = useParams();
     const [problem, setProblem] = useState();
@@ -16,7 +18,7 @@ function ProblemDescription() {
     useEffect(() => {
         const fetchProblem = async () => {
             try {
-                const result = await axios.get(`http://localhost:3000/problems/${id}`, {
+                const result = await axios.get(`${BACKEND_URL}/problems/${id}`, {
                     withCredentials: true,
                 });
                 if (!result.data) {

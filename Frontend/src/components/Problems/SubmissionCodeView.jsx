@@ -4,6 +4,8 @@ import axios from 'axios';
 import './ProblemSubmissions.css';
 import CircularProgress from '@mui/material/CircularProgress';
 
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
+
 function formatFormalDate(dateStr) {
   const date = new Date(dateStr);
   const day = date.getDate().toString().padStart(2, '0');
@@ -30,7 +32,7 @@ function SubmissionCodeView() {
     const fetchSubmission = async () => {
       try {
         setLoading(true);
-        const res = await axios.get(`http://localhost:3000/submissions/single/${id}`, { withCredentials: true });
+        const res = await axios.get(`${BACKEND_URL}/submissions/single/${id}`, { withCredentials: true });
         setSubmission(res.data);
         setError(null);
       } catch (err) {

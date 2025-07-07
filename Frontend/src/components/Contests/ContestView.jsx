@@ -5,6 +5,8 @@ import "./ContestView.css";
 import ReactMarkdown from 'react-markdown';
 import CircularProgress from '@mui/material/CircularProgress';
 
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
+
 function ContestView({ contestId }) {
     const [contest, setContest] = useState(null);
     const [status, setStatus] = useState("loading"); // 'future', 'ongoing', 'past', 'loading', 'notlive'
@@ -15,7 +17,7 @@ function ContestView({ contestId }) {
         async function fetchContest() {
             try {
                 const res = await axios.get(
-                    `http://localhost:3000/contests/${contestId}`,
+                    `${BACKEND_URL}/contests/${contestId}`,
                     { withCredentials: true }
                 );
                 setContest(res.data);
@@ -157,7 +159,7 @@ function LeaderboardSection({ contestId }) {
         async function fetchLeaderboard() {
             try {
                 const res = await axios.get(
-                    `http://localhost:3000/contests/${contestId}/leaderboard`,
+                    `${BACKEND_URL}/contests/${contestId}/leaderboard`,
                     { withCredentials: true }
                 );
                 setLeaderboard(res.data);

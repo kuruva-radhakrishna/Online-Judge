@@ -24,11 +24,12 @@ function EditProblem() {
   const [submitting, setSubmitting] = useState(false);
   const [fetching, setFetching] = useState(true);
   const [aiLoading, setAiLoading] = useState(false);
+  const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
 
   useEffect(() => {
     const fetchProblem = async () => {
       try {
-        const res = await axios.get(`http://localhost:3000/problems/${id}`, { withCredentials: true });
+        const res = await axios.get(`${BACKEND_URL}/problems/${id}`, { withCredentials: true });
         const p = res.data;
         setProblemName(p.problemName || '');
         setProblemDescription(p.problemDescription || '');
@@ -42,7 +43,7 @@ function EditProblem() {
       setFetching(false);
     };
     fetchProblem();
-  }, [id]);
+  }, [id, BACKEND_URL]);
 
   if (loading || fetching) return (
     <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '40vh' }}>
@@ -71,7 +72,7 @@ function EditProblem() {
     setMessage('');
     setAiLoading(true);
     try {
-      const result = await axios.post('http://localhost:3000/ai/createProblem', {
+      const result = await axios.post(`${BACKEND_URL}/ai/createProblem`, {
         problem: {
           problemName,
           problemDescription,
@@ -97,7 +98,8 @@ function EditProblem() {
         setMessage('AI did not return a valid problem.');
       }
     } catch (error) {
-      setMessage('AI completion failed.');
+      console.log(error);
+      setMessage(error.response.data.message);
     }
     setAiLoading(false);
   };
@@ -107,7 +109,7 @@ function EditProblem() {
     setSubmitting(true);
     setMessage('');
     try {
-      await axios.patch(`http://localhost:3000/admin/problems/${id}/update`, {
+      await axios.patch(`${BACKEND_URL}/admin/problems/${id}/update`, {
         problem: {
           problemName,
           problemDescription,

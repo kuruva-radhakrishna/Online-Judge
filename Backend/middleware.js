@@ -3,7 +3,10 @@ module.exports.isLoggedIn = function (req,res,next){
         return next();
     }
     else {
-        return res.redirect('/login');
+        console.log(req.session);
+        console.log(req.cookies);
+        
+        return res.json({message : "User is not present"});
     }
 };
 

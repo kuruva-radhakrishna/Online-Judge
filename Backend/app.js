@@ -30,7 +30,9 @@ const allowedOrigins = [
 
 app.use(cors({
   origin: allowedOrigins,
-  credentials: true
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  credentials: true,  
+  allowedHeaders: ['Content-Type', 'Authorization']
 }));
 
 connection();
@@ -45,14 +47,17 @@ passport.deserializeUser(User.deserializeUser());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+const isProd = process.env.NODE_ENV === 'production';
+
 app.use(session({
   secret: "yourSecretKey",
   resave: false,
   saveUninitialized: false,
   cookie: {
-    sameSite: "none",
-    secure: true,
-    maxAge: 24 * 60 * 60 * 1000*7 // 1 day
+    httpOnly: true, // extra security
+    secure: isProd, // only true in production
+    sameSite: isProd ? "none" : "lax", // fix here
+    maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
   }
 }));
 

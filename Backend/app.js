@@ -33,18 +33,6 @@ app.use(cors({
   credentials: true
 }));
 
-// const data = async function (){
-//     try {
-//         for(const p of problems){
-//             await Problem.create(p);
-//         }
-//     } catch (error) {
-//         console.log(error);
-//     }
-// };
-
-// data();
-
 connection();
 
 passport.use(
@@ -57,17 +45,16 @@ passport.deserializeUser(User.deserializeUser());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-app.use(
-    session({
-        secret: "yourSecretKey",
-        resave: false,
-        saveUninitialized: false,
-        cookie: {
-            sameSite: "lax", // or 'none' if you're using different ports or domains
-            secure: false, // set to true in production with HTTPS
-        },
-    })
-);
+app.use(session({
+  secret: "yourSecretKey",
+  resave: false,
+  saveUninitialized: false,
+  cookie: {
+    sameSite: "none",
+    secure: true,
+    maxAge: 24 * 60 * 60 * 1000*7 // 1 day
+  }
+}));
 
 app.use(passport.initialize());
 app.use(passport.session());

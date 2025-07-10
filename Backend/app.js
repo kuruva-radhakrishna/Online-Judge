@@ -52,9 +52,8 @@ app.use(
         secret: "yourSecretKey",
         resave: false,
         saveUninitialized: false,
-        store: MongoStore.create({ mongoUrl: process.env.MONGOOSE_URL }),
         cookie: {
-            httpOnly : true,
+            httpOnly: true,
             sameSite: "none",
             secure: true,
             maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days, optional

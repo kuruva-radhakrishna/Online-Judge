@@ -8,13 +8,12 @@ const port = process.env.PORT;
 
 const LocalStrategy = require("passport-local").Strategy;
 const passport = require("passport");
-const session = require("express-session");
-const MongoStore = require('connect-mongo');
+const session = require("cookie-session");
 
 const User = require("./Models/user.js");
 const UserRoute = require("./Routes/UserRoute.js");
 const ProblemRoute = require("./Routes/ProblemRoute.js");
-const {SubmissionRouter} = require("./Routes/SubmissionRoute.js");
+const { SubmissionRouter } = require("./Routes/SubmissionRoute.js");
 const ContestRoute = require("./Routes/ContestRoute.js");
 const AdminRoute = require("./Routes/AdminRoute.js");
 const AIRoute = require("./Routes/AIRoute.js");
@@ -30,15 +29,15 @@ const allowedOrigins = [
 ].filter(Boolean);
 
 app.use(cors({
-    origin: allowedOrigins,
-    credentials: true,  
+  origin: allowedOrigins,
+  credentials: true,
 }));
 
 
 connection();
 
 passport.use(
-    new LocalStrategy({ usernameField: "email" }, User.authenticate())
+  new LocalStrategy({ usernameField: "email" }, User.authenticate())
 );
 passport.serializeUser(User.serializeUser());
 passport.deserializeUser(User.deserializeUser());
@@ -48,18 +47,14 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 app.use(
-    session({
-        secret: "yourSecretKey",
-        resave: false,
-        saveUninitialized: false,
-        store: MongoStore.create({client:mongoose.connection}),
-        cookie: {
-            httpOnly: true,
-            sameSite: "none",
-            secure: true,
-            maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days, optional
-        },
-    })
+  session({
+    name: "session",
+    keys: ["najn", "knck"],
+    httpOnly: true,
+    sameSite: "none",
+    secure: true,
+    maxAge: 7 * 24 * 60 * 60 * 1000,// 7 days, optional
+  })
 );
 
 app.use(passport.initialize());
@@ -67,7 +62,7 @@ app.use(passport.session());
 
 app.use("/", UserRoute); // Handles /register, /login, /auth/check, etc.
 
-app.use('/ai',AIRoute);
+app.use('/ai', AIRoute);
 
 app.use("/problems", ProblemRoute);
 
@@ -173,5 +168,5 @@ app.get('/debug/session', (req, res) => {
 });
 
 app.listen(port, () => {
-    console.log(`Server is listening on port ${port}`);
+  console.log(`Server is listening on port ${port}`);
 });

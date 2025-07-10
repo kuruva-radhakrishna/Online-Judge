@@ -3,7 +3,7 @@ require("dotenv").config();
 const express = require("express");
 const app = express();
 const { connection } = require("./Database/Connection.js");
-
+const mongoose = require("mongoose");
 const port = process.env.PORT;
 
 const LocalStrategy = require("passport-local").Strategy;
@@ -30,8 +30,8 @@ const allowedOrigins = [
 ].filter(Boolean);
 
 app.use(cors({
-  origin: allowedOrigins,
-  credentials: true
+    origin: allowedOrigins,
+    credentials: true,  
 }));
 
 
@@ -52,9 +52,9 @@ app.use(
         secret: "yourSecretKey",
         resave: false,
         saveUninitialized: false,
-        store: MongoStore.create({ mongoUrl: process.env.MONGOOSE_URL }),
+        store: MongoStore.create({client:mongoose.connection}),
         cookie: {
-            httpOnly : true,
+            httpOnly: true,
             sameSite: "none",
             secure: true,
             maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days, optional

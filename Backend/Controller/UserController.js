@@ -30,20 +30,33 @@ exports.login = (req, res, next) => {
     const passport = require('passport');
     passport.authenticate('local', (err, user, info) => {
         if (err) {
-            return res.status(500).json({ error: 'Server Error' })
+            return res.status(500).json({ error: 'Server Error' });
         }
         if (!user) {
-            return res.status(401).json({ error: 'Invalid credentials' })
+            return res.status(401).json({ error: 'Invalid credentials' });
         }
+
         req.logIn(user, (err) => {
             if (err) {
-                return res.status(500).json({ error: 'Login Failed' })
+                return res.status(500).json({ error: 'Login Failed' });
             }
-            const { password, ...userSafe } = user.toObject ? user.toObject() : user;
-            res.json({ message: `Welcome back ${user.firstname + " " + user.lastname} `, user: userSafe });
-        })
+
+            // 🔧 Force session save before sending response
+            req.session.save((err) => {
+                if (err) {
+                    return res.status(500).json({ error: 'Session save failed' });
+                }
+
+                const { password, hash, salt, ...userSafe } = user.toObject ? user.toObject() : user;
+                res.json({
+                    message: `Welcome back ${user.firstname} ${user.lastname}`,
+                    user: userSafe,
+                });
+            });
+        });
     })(req, res, next);
 };
+
 
 exports.checkAuth = (req, res) => {
     if (req.isAuthenticated && req.isAuthenticated()) {

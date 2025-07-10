@@ -30,10 +30,9 @@ const allowedOrigins = [
 ].filter(Boolean);
 
 app.use(cors({
-    origin: true,  
+    origin: "*",  
     methods: ['GET', 'POST', 'PUT', 'DELETE'],
     credentials: true,  
-    allowedHeaders: ['Content-Type', 'Authorization']
 }));
 
 

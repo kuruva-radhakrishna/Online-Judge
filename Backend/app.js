@@ -46,12 +46,14 @@ passport.deserializeUser(User.deserializeUser());
 //JSON  parser
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.set('trust proxy', 1);
 
 app.use(
     session({
         secret: "yourSecretKey",
         store: MongoStore.create({ mongoUrl: process.env.MONGOOSE_URL }),
         cookie: {
+            httpOnly:true,
             sameSite: "none",
             secure: true,
             maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days, optional

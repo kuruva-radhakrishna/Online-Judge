@@ -1,7 +1,10 @@
+require('dotenv').config();
 const Submission = require('../Models/Submissions');
 const Problem = require('../Models/Problems');
 const axios = require('axios');
 const Contest = require('../Models/Contests');
+
+const COMPILER_URL = process.env.COMPILER_URL;
 
 exports.allSubmissionsByUser = async (req, res) => {
     //return all submissions of User
@@ -54,11 +57,11 @@ exports.createSubmission = async (req, res) => {
         }
 
         for (const tc of problem.TestCases) {
-            const result = await axios.post("http://localhost:8000/run", {
+            const result = await axios.post(`${COMPILER_URL}/run`, {
                 code,
                 language,
                 input: tc.input,
-            });
+            },{withCredentials:true});
 
             const output = result.data.output?.output;
 

@@ -287,4 +287,13 @@
   font-family: 'Roboto Mono', monospace;
   font-size: 1.2em;
   letter-spacing: 0.04em;
+}
+
+.custom-scroll {
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none;  /* IE and Edge */
+  overscroll-behavior: contain; /* Prevent scroll chaining */
+}
+.custom-scroll::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Opera */
 } 

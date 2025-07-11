@@ -24,6 +24,7 @@ import ContestProblemDescription from './components/Contests/ContestProblemDescr
 import ContestProblemSubmissions from './components/Contests/ContestProblemSubmissions';
 import EditContest from './components/Contests/EditContest';
 import AIChat from './components/AIChat/AIChat';
+import ProtectedRoute from './components/ProtectedRoute';
 
 function AppRoutes() {
   // Always show Nav
@@ -37,18 +38,13 @@ function AppRoutes() {
           <Route path="/signup" element={<SignUp />} />
           <Route path="/login" element={<Login />} />
           <Route path="/problems" element={
-              <Problems />
-            
+            <ProtectedRoute><Problems /></ProtectedRoute>
           } />
           <Route path="/problems/new" element={
-            
-              <NewProblem />
-            
+            <ProtectedRoute><NewProblem /></ProtectedRoute>
           } />
           <Route path="/problem/:id/*" element={
-            
-              <Problem />
-            
+            <ProtectedRoute><Problem /></ProtectedRoute>
           }>
             <Route index element={<Navigate to="description" />} />
             <Route path="description" element={<ProblemDescription />} />
@@ -56,61 +52,41 @@ function AppRoutes() {
             <Route path="discussions" element={<ProblemDiscussion />} />
           </Route>
           <Route path="/problems/:id/edit" element={
-            
-              <EditProblem />
-            
+            <ProtectedRoute><EditProblem /></ProtectedRoute>
           } />
           <Route path='/contests' element={
-            
-              <Contests />
-            
+            <ProtectedRoute><Contests /></ProtectedRoute>
           } />
           <Route path='/contests/:id/*' element={
-            
-              <ContestView />
-            
+            <ProtectedRoute><ContestView /></ProtectedRoute>
           } >
             <Route path='leaderboard' element={<ContestLeaderBoard />} />
             <Route path='submissions' element={<ContestSubmissions />} />
             <Route path='discussions' element={<ContestDiscussions />} />
           </Route>
           <Route path="/submission/:id" element={
-            
-              <SubmissionCodeView />
-           
+            <ProtectedRoute><SubmissionCodeView /></ProtectedRoute>
           } />
           <Route path='/profile' element={
-            
-              <Profile />
-            
+            <ProtectedRoute><Profile /></ProtectedRoute>
           } />
           <Route path='/contests/:id' element={
-            
-              <ContestViewWrapper />
-            
+            <ProtectedRoute><ContestViewWrapper /></ProtectedRoute>
           } />
           <Route path="/contests/:contestId/problem/:problemId/*" element={
-            
-              <ContestProblemView />
-            
+            <ProtectedRoute><ContestProblemView /></ProtectedRoute>
           }>
             <Route path="description" element={<ContestProblemDescription />} />
             <Route path="submissions" element={<ContestProblemSubmissions />} />
           </Route>
           <Route path="/problem/:problemId/*" element={
-            
-              <Problem />
-            
+            <ProtectedRoute><Problem /></ProtectedRoute>
           } />
           <Route path="/contests/new" element={
-            
-              <NewContest />
-            
+            <ProtectedRoute><NewContest /></ProtectedRoute>
           } />
           <Route path="/contests/:id/edit" element={
-            
-              <EditContest />
-            
+            <ProtectedRoute><EditContest /></ProtectedRoute>
           } />
         </Routes>
       </div>

@@ -17,9 +17,13 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
 const allowedOrigins = [
-  process.env.FRONTEND_URL,
-  process.env.FRONTEND_URL_LOCAL
+    process.env.FRONTEND_URL,
+    process.env.FRONTEND_URL_LOCAL,
+    process.env.BACKEND_URL,
+    process.env.BACKEND_URL_LOCAL
 ].filter(Boolean);
+
+console.log(allowedOrigins);
 
 app.use(cors({
     origin: allowedOrigins,
@@ -82,7 +86,8 @@ app.post('/run', async (req, res) => {
 
     }
 })
-app.listen(8000, () => {
-    console.log('app listening on port 8000');
-})
+app.listen(process.env.PORT, '0.0.0.0', () => {
+    console.log(`app listening on port ${process.env.PORT}`);
+});
+
 connection();

@@ -1,6 +1,9 @@
+require('dotenv').config();
 const Contest = require('../Models/Contests');
 const Problem = require('../Models/Problems');
 const { validateContest } = require('../validators/contestValidation');
+
+const COMPILER_URL = process.env.COMPILER_URL;
 
 exports.getContests = async (req, res) => {
     //return all contests
@@ -94,11 +97,11 @@ exports.contestSubmission = async (req, res) => {
         // Run code against all test cases
         const verdicts = [];
         for (const tc of problem.TestCases) {
-            const result = await axios.post("http://localhost:8000/run", {
+            const result = await axios.post(`${COMPILER_URL}/run`, {
                 code,
                 language,
                 input: tc.input,
-            });
+            },{withCredentials:true});
             const output = result.data.output?.output;
             if (output !== undefined) {
                 if (output.trim() === tc.output.trim()) {

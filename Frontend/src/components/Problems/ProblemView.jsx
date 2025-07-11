@@ -129,6 +129,7 @@ function Problem(props) {
             setShowFailedCase(true);
             fetchSubmissions();
         } catch (error) {
+            console.log(error);
             setVerdicts([{ status: 'Submission failed.' }]);
             setFailedCase(null);
         }
@@ -164,8 +165,8 @@ function Problem(props) {
 
     return (
         <div className="problem-view">
-            <div className="row" style={{ display: "flex" }}>
-                <div className="problem" style={{ width: "50%" }}>
+            <div className="row" style={{ display: "flex", height: '80vh' }}>
+                <div className="problem custom-scroll" style={{ width: "50%", height: '100%', overflowY: 'auto' }}>
                     <div style={{ marginBottom: "1rem", display: 'flex', gap: 8 }}>
                         <button onClick={() => setTab('description')} className={tab === 'description' ? 'active-tab' : ''}>Description</button>
                         <button onClick={() => setTab('submissions')} className={tab === 'submissions' ? 'active-tab' : ''}>Submissions</button>
@@ -176,7 +177,7 @@ function Problem(props) {
                     {tab === 'discussions' && <ProblemDiscussion problemId={problemId} />}
                 </div>
                 {/* Right section: Code editor and controls */}
-                <div className="solution" style={{ width: "50%" }}>
+                <div className="solution custom-scroll" style={{ width: "50%", height: '100%', overflowY: 'auto' }}>
                     <select
                         name="language"
                         value={language}

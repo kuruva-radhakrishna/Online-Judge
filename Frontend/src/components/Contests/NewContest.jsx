@@ -66,12 +66,14 @@ function NewContest() {
       return;
     }
     try {
-      await axios.post(`${BACKEND_URL}/contests/new`, {
-        contestTitle: title,
-        startTime,
-        endTime,
-        problems: selectedProblems.map(id => ({ problem_id: id, points: Number(problemPoints[id]) })),
-        description,
+      await axios.post(`${BACKEND_URL}/admin/contest/new`, {
+        contest : {
+          contestTitle: title,
+          startTime,
+          endTime,
+          problems: selectedProblems.map(id => ({ problem_id: id, points: Number(problemPoints[id]) })),
+          description,
+        }
       }, { withCredentials: true });
       navigate('/contests');
     } catch (err) {

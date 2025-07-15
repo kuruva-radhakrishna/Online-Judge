@@ -1,6 +1,5 @@
 .problem-view {
   width: 100vw;
-  min-height: 100vh;
   margin: 0;
   padding: 32px 5vw;
   background: #fff;
@@ -23,6 +22,21 @@
 .problem-view .problem, .problem-view .solution {
   width: 50%;
 }
+
+.problem-view {
+  height: 100vh;
+  overflow: hidden;
+}
+.problem-view .row {
+  flex: 1;
+  overflow: hidden;
+}
+.problem-view .problem,
+.problem-view .solution {
+  height: calc(100vh - 64px);
+  overflow-y: auto;
+}
+
 
 .problem-view .problem-header {
   display: flex;
@@ -128,7 +142,6 @@
 .ai-review-content {
   font-size: 1rem;
   color: #1a237e;
-  white-space: pre-line;
 }
 
 .ai-debug-container {
@@ -144,7 +157,6 @@
 .ai-debug-content {
   font-size: 1rem;
   color: #205723;
-  white-space: pre-line;
 }
 
 .problem-view button:disabled {
@@ -240,6 +252,33 @@
 .ai-review-btn:hover:not(:disabled) {
   background: #311b92;
   color: #fff;
+}
+
+.ai-close-btn {
+  position: absolute;
+  top: 14px;
+  right: 18px;
+  background: #fff;
+  border: 2px solid #ffa116;
+  border-radius: 50%;
+  width: 28px;
+  height: 28px;
+  font-size: 1.25rem;
+  color: #ffa116;
+  cursor: pointer;
+  font-weight: 900;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 8px rgba(255,161,22,0.10);
+  transition: background 0.18s, color 0.18s, border 0.18s;
+  z-index: 2;
+  outline: none;
+}
+.ai-close-btn:hover, .ai-close-btn:focus {
+  background: #ffa116;
+  color: #fff;
+  border-color: #ff9800;
 }
 
 @media (max-width: 900px) {

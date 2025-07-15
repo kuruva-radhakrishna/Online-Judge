@@ -36,6 +36,7 @@ function Profile() {
             try {
                 setLoading(true);
                 const res = await axios.get(`${BACKEND_URL}/api/profile/summary`, { withCredentials: true });
+                console.log(res.data);
                 setProfileData(res.data);
             } catch (error) {
                 // handle error
@@ -51,10 +52,29 @@ function Profile() {
     const bestRank = profileData?.attendedContests?.length > 0 ? Math.min(...profileData.attendedContests.map(c => c.userStats?.rank || 9999)) : null;
     const isNewUser = profileData?.user && profileData.user.createdAt && (new Date() - new Date(profileData.user.createdAt)) < 7 * 24 * 60 * 60 * 1000;
     const has100Solved = solvedTotal >= 100;
+    if(profileData && profileData.submissionsByUser){
+        profileData.submissionsByUser.sort((s1,s2)=>s2.createdAt-s1.createdAt);
+    }
 
     if (!profileData || loading) {
         return <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '60vh' }}><CircularProgress size={60} thickness={5} /></div>;
     }
+
+    const handleDeleteContest = async (contestId) => {
+        if (!window.confirm('Are you sure you want to delete this contest? This action cannot be undone.')) return;
+        try {
+            await axios.delete(`${BACKEND_URL}/contests/${contestId}`, { withCredentials: true });
+            setDeleteMsg('Contest deleted successfully.');
+            // Optionally refresh profile data
+            setProfileData(prev => ({
+                ...prev,
+                createdContests: prev.createdContests.filter(c => c._id !== contestId)
+            }));
+        } catch (error) {
+            setDeleteMsg('Failed to delete contest.');
+            console.error(error);
+        }
+    };
 
     return (
         <Box className="profile-root">

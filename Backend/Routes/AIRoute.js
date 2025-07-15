@@ -16,6 +16,5 @@ router.post('/contest-description', AIController.generateContestDescription);
 router.post('/chat', AIController.chat);
 
 router.post('/generate-problem', AIController.generateProblem);
-router.post('/suggest-test-cases', AIController.suggestTestCases);
 
 module.exports = router;

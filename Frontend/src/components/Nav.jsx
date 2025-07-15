@@ -36,33 +36,21 @@ function Nav() {
   return (
     <AppBar position="static" className="nav-appbar" mb="5" component="nav" elevation={0}>
       <Toolbar>
-        <Link to="/" className="navbar-logo" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', marginRight: 32 }}>
-          <span style={{ display: 'flex', alignItems: 'center', marginRight: 10 }}>
-            {/* Modern styled C and A logo, no circle */}
-            <span style={{
-              fontWeight: 900,
-              fontSize: '2rem',
-              color: '#fff',
-              fontFamily: 'Segoe UI, Arial, sans-serif',
-              letterSpacing: '-2px',
-              marginRight: 2
-            }}>C</span>
-            <span style={{
-              fontWeight: 900,
-              fontSize: '2rem',
-              color: '#ffa116',
-              fontFamily: 'Segoe UI, Arial, sans-serif',
-              letterSpacing: '-2px'
-            }}>A</span>
-          </span>
-          <span className="ca-navbar-brand" style={{ 
-            fontWeight: 700, 
-            fontSize: '1.4rem', 
-            color: '#222', 
-            letterSpacing: '0.5px', 
-            fontFamily: 'Segoe UI, Arial, sans-serif'
-          }}>CodeArena</span>
-        </Link>
+        <div className="navbar-left">
+          <Link to="/" className="navbar-logo" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', marginRight: 32 }}>
+            <img src="/logo.png" alt="CodeArena Logo" style={{ height: 40, marginRight: 12, verticalAlign: 'middle' }} />
+            <span className="ca-navbar-brand" style={{ 
+              fontWeight: 700, 
+              fontSize: '1.4rem', 
+              color: '#222', 
+              letterSpacing: '0.5px', 
+              fontFamily: 'Segoe UI, Arial, sans-serif'
+            }}>
+              <span style={{ color: '#fff' }}>Code</span>
+              <span style={{ color: '#ffa116' }}>Arena</span>
+            </span>
+          </Link>
+        </div>
         <div style={{ flexGrow: 1 }} />
         {user && (
           <>

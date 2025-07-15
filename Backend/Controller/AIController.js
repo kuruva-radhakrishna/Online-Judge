@@ -15,29 +15,47 @@ exports.generateProblem = async (req, res) => {
     }
 };
 
-exports.suggestTestCases = async (req, res) => {
-    try {
-        const { description } = req.body;
-        // Placeholder for AI logic
-        // const testCases = await someAILibrary.suggestTestCases(description);
-        res.json({ message: 'AI suggested test cases', description });
-    } catch (err) {
-        res.status(500).json({ error: 'Failed to suggest test cases' });
-    }
-};
-
 exports.reviewCode = async (req, res) => {
     try {
-        const { code } = req.body;
+        const { code, problemId } = req.body;
+        const prob = await Problem.findById(problemId);
+
+        const prompt = `
+            You are a senior software engineer reviewing code submitted for a coding problem.
+
+            ---
+            Problem Description:
+            ${prob.description}
+
+            Submitted Code:
+            ${code}
+
+            Review Instructions:
+            1. Identify logical correctness and whether it solves the problem.
+            2. Point out potential edge cases it might fail.
+            3. Comment on code readability and structure.
+            4. Evaluate performance (time/space complexity).
+            5. Suggest improvements (best practices, optimizations, naming, etc.).
+            6. Mention if the code is good enough to be accepted or needs fixes.
+
+            Respond in this format:
+            - Summary (2-3 lines)
+            - Issues Found (if any)
+            - Suggestions
+            - Overall Verdict (Accept / Needs Fixes)
+            -Your review will be displayed using react markdown reply accordingly`;
+
         const response = await ai.models.generateContent({
             model: "gemini-2.5-flash",
-            contents: `Analyze and provide a crisp review of the code\nCode: ${code}`,
+            contents: prompt,
         });
         res.json({ review: response.text });
     } catch (error) {
+        console.log(error);
         res.status(500).json({ message: "Server Issue" });
     }
 };
+
 
 exports.createProblemAI = async (req, res) => {
     try {
@@ -86,7 +104,16 @@ exports.debugCode = async (req, res) => {
         const { code } = req.body;
         const response = await ai.models.generateContent({
             model: "gemini-2.5-flash",
-            contents: `You are a code debugging assistant. Analyze the following code and provide a crisp, actionable debug summary in 4-5 sentences. Focus on possible bugs, logical errors, edge cases, or improvements. Do NOT explain the whole problem or restate the problem statement. Only give feedback on the code itself.\n\nUser Code:\n${code}\n`,
+            contents: `You are a senior software engineer assisting in debugging user-submitted code.
+            Instructions:
+            - Identify and explain any bugs, logical errors, or edge case failures.
+            - Point out any common runtime or syntax issues.
+            - Suggest fixes or improvements if necessary.
+            - Avoid restating the problem statement or describing what the code is trying to do unless needed to explain a bug.
+            - Keep your response concise (4-6 sentences max) and focused only on debugging.
+
+            User Code:
+            ${code}`
         });
         res.json({ debug: response.text });
     } catch (error) {
@@ -110,7 +137,7 @@ exports.generateContestDescription = async (req, res) => {
 exports.chat = async (req, res) => {
     try {
         const { message, chatHistory } = req.body;
-        
+
         // Build context from chat history
         let context = "You are an expert programming assistant for an online coding judge platform. You help users with:\n\n";
         context += "• Code review and debugging\n";
@@ -120,7 +147,7 @@ exports.chat = async (req, res) => {
         context += "• Data structures and algorithms\n";
         context += "• Competitive programming tips\n\n";
         context += "Provide clear, concise, and helpful responses. Use markdown formatting for code blocks and emphasis. Be concise. Limit your response to a few sentences unless code is requested.\n\n";
-        
+
         // Add chat history for context
         if (chatHistory && chatHistory.length > 0) {
             context += "Previous conversation:\n";
@@ -131,9 +158,9 @@ exports.chat = async (req, res) => {
             });
             context += "\n";
         }
-        
+
         context += `User: ${message}\n\nAssistant:`;
-        
+
         const response = await ai.models.generateContent({
             model: "gemini-2.5-flash",
             contents: context,
@@ -142,7 +169,7 @@ exports.chat = async (req, res) => {
                 maxOutputTokens: 400,
             }
         });
-        
+
         res.json({ response: response.text });
     } catch (error) {
         console.error('AI Chat Error:', error);

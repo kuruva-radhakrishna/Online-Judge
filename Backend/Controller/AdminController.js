@@ -94,12 +94,14 @@ exports.createContest = async (req, res) => {
 
     try {
         const newContest = req.body.contest;
+        newContest.createdBy = req.user._id;
         const result = await Contest.create(newContest);
         if (!result) {
             return res.status(500).json({ message: "Database error. Unable to create contest" });
         }
         return res.status(200).json({ message: "Contest Created Successfully" });
     } catch (error) {
+        console.log(error);
         res.status(500).json({ message: "Internal Sever Issue" });
     }
 };
@@ -125,6 +127,7 @@ exports.updateContest = async (req, res) => {
         }
         return res.status(200).json({ message: "Successfully updated the contest" });
     } catch (error) {
+        console.log(error);
         return res.status(500).json({ message: "Internal Server Issue" });
     }
 };

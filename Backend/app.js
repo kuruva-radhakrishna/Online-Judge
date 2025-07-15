@@ -14,7 +14,7 @@ const MongoStore = require('connect-mongo');
 const User = require("./Models/user.js");
 const UserRoute = require("./Routes/UserRoute.js");
 const ProblemRoute = require("./Routes/ProblemRoute.js");
-const {SubmissionRouter} = require("./Routes/SubmissionRoute.js");
+const { SubmissionRouter } = require("./Routes/SubmissionRoute.js");
 const ContestRoute = require("./Routes/ContestRoute.js");
 const AdminRoute = require("./Routes/AdminRoute.js");
 const AIRoute = require("./Routes/AIRoute.js");
@@ -30,15 +30,15 @@ const allowedOrigins = [
 ].filter(Boolean);
 
 app.use(cors({
-    origin: allowedOrigins,
-    credentials: true,  
+  origin: allowedOrigins,
+  credentials: true,
 }));
 
 
 connection();
 
 passport.use(
-    new LocalStrategy({ usernameField: "email" }, User.authenticate())
+  new LocalStrategy({ usernameField: "email" }, User.authenticate())
 );
 passport.serializeUser(User.serializeUser());
 passport.deserializeUser(User.deserializeUser());
@@ -49,16 +49,16 @@ app.use(express.urlencoded({ extended: true }));
 app.set('trust proxy', 1);
 
 app.use(
-    session({
-        secret: "yourSecretKey",
-        store: MongoStore.create({ mongoUrl: process.env.MONGOOSE_URL }),
-        cookie: {
-            httpOnly:true,
-            sameSite: "none",
-            secure: true,
-            maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days, optional
-        },
-    })
+  session({
+    secret: "yourSecretKey",
+    store: MongoStore.create({ mongoUrl: process.env.MONGOOSE_URL }),
+    cookie: {
+      httpOnly: true,
+      sameSite: "none",
+      secure: true,
+      maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days, optional
+    },
+  })
 );
 
 app.use(passport.initialize());
@@ -66,7 +66,7 @@ app.use(passport.session());
 
 app.use("/", UserRoute); // Handles /register, /login, /auth/check, etc.
 
-app.use('/ai',AIRoute);
+app.use('/ai', AIRoute);
 
 app.use("/problems", ProblemRoute);
 
@@ -78,7 +78,9 @@ app.use("/admin", AdminRoute);
 
 app.get('/api/profile/summary', async (req, res) => {
   try {
-    if (!req.user) return res.status(401).json({ error: 'Unauthorized' });
+    if (!req.user) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
     const userId = req.user._id;
     const userRole = req.user.role;
 
@@ -124,23 +126,49 @@ app.get('/api/profile/summary', async (req, res) => {
     // Contests attended by user (with rank, points, solvedProblems)
     const allContests = await Contest.find({ 'leaderBoard.user_id': userId });
     const attendedContests = allContests.map(contest => {
-      // Find user entry in leaderboard
-      const sorted = [...contest.leaderBoard].sort((a, b) => {
-        if (b.points !== a.points) return b.points - a.points;
+      const sorted = [...contest.leaderBoard].map(entry => {
+        const totalPoints = (entry.points || []).reduce((sum, val) => sum + val, 0);
+        const uid = entry.user_id?._id?.toString?.() || entry.user_id?.toString?.();
+
+        // Get latest accepted submission timestamp
+        let lastSubmission = null;
+        for (const problemSubs of entry.submissions || []) {
+          for (let i = problemSubs.length - 1; i >= 0; i--) {
+            if (problemSubs[i].verdict === 'Accepted') {
+              const submittedAt = new Date(problemSubs[i].submittedAt);
+              if (!lastSubmission || submittedAt > lastSubmission) {
+                lastSubmission = submittedAt;
+              }
+              break; // only last AC per problem needed
+            }
+          }
+        }
+
+        return {
+          ...entry,
+          uid,
+          totalPoints,
+          lastSubmission
+        };
+      }).sort((a, b) => {
+        if (b.totalPoints !== a.totalPoints) return b.totalPoints - a.totalPoints;
         if (!a.lastSubmission) return 1;
         if (!b.lastSubmission) return -1;
         return new Date(a.lastSubmission) - new Date(b.lastSubmission);
       });
-      const idx = sorted.findIndex(e => e.user_id && e.user_id.toString() === userId.toString());
+
+      const idx = sorted.findIndex(e => e.uid === userId.toString());
+
       let userStats = null;
       if (idx !== -1) {
         const entry = sorted[idx];
         userStats = {
           rank: idx + 1,
-          points: entry.points,
-          solvedProblems: entry.solvedProblems ? entry.solvedProblems.length : 0,
+          totalPoints: entry.totalPoints,
+          solvedProblems: (entry.points || []).filter(p => p > 0).length
         };
       }
+
       return {
         _id: contest._id,
         contestTitle: contest.contestTitle,
@@ -148,7 +176,6 @@ app.get('/api/profile/summary', async (req, res) => {
         userStats,
       };
     });
-
     res.json({
       user: req.user,
       solvedStats,
@@ -172,5 +199,5 @@ app.get('/debug/session', (req, res) => {
 });
 
 app.listen(port, () => {
-    console.log(`Server is listening on port ${port}`);
+  console.log(`Server is listening on port ${port}`);
 });

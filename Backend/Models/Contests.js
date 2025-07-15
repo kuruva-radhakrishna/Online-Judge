@@ -56,19 +56,14 @@ const ContestSchema = mongoose.Schema({
                 type : mongoose.Schema.Types.ObjectId,
                 ref : 'User',
             },
-            points : {
-                type : Number,
-                default : 0,
+            points: {
+                type: [Number],
+                default: [], // Will be initialized to length = num problems
             },
-            solvedProblems : [{
-                problem_id : {
-                    type : mongoose.Schema.Types.ObjectId,
-                    ref : 'Problem',
-                },
-            }],
-            lastSubmission : {
-                type : Date,
-            }
+            submissions: {
+                type: [[mongoose.Schema.Types.Mixed]],
+                default: [], // 2D array: submissions[problemIndex] = array of submissions for that problem
+            },
         }
     ],
     Discussions : [

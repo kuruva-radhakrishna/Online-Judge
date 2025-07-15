@@ -28,6 +28,24 @@ function ContestProblemView() {
     const [verdicts, setVerdicts] = useState([]);
     const [submissions, setSubmissions] = useState([]);
     const [timerString, setTimerString] = useState("");
+    const [runLoading, setRunLoading] = useState(false);
+    const [submitLoading, setSubmitLoading] = useState(false);
+
+    useEffect(() => {
+        switch (language) {
+            case "c++":
+                setCode(`#include <bits/stdc++.h>\nusing namespace std;\n\nint main() {\n    // your code here\n    return 0;\n}`);
+                break;
+            case "python":
+                setCode(`def main():\n    # your code here\n    pass\n\nif __name__ == "__main__":\n    main()`);
+                break;
+            case "java":
+                setCode(`public class Main {\n    public static void main(String[] args) {\n        // your code here\n    }\n}`);
+                break;
+            default:
+                setCode(`#include <bits/stdc++.h>\nusing namespace std;\n\nint main() {\n    // your code here\n    return 0;\n}`);
+        }
+    }, [language]);
 
     useEffect(() => {
         const fetchContest = async function () {
@@ -118,6 +136,7 @@ function ContestProblemView() {
     }
 
     const handleRun = async () => {
+        setRunLoading(true);
         try {
             const result = await axios.post(`${COMPILER_URL}/run`, {
                 language,
@@ -133,8 +152,10 @@ function ContestProblemView() {
         } catch (error) {
             setOutput('Run failed.');
         }
+        setRunLoading(false);
     };
     const handleSubmit = async () => {
+        setSubmitLoading(true);
         try {
             const url = `${BACKEND_URL}/contests/submission/${contestId}/${problemId}`;
             const payload = {
@@ -147,8 +168,9 @@ function ContestProblemView() {
             setVerdicts(result.data);
             fetchSubmissions();
         } catch (error) {
-            setVerdicts([{ status: 'Submission failed.' }]);
+            console.log(error.message);
         }
+        setSubmitLoading(false);
     };
 
     return (
@@ -183,8 +205,12 @@ function ContestProblemView() {
                     <CodeEditor value={code} onChange={setCode} language={language} />
                     <Box display="flex" gap={2} mt={2} justifyContent="space-between">
                         <div style={{ display: 'flex', gap: 16 }}>
-                            <button onClick={handleRun} className="run-btn">▶️ Run</button>
-                            <button onClick={handleSubmit} className="submit-btn">📤 Submit</button>
+                            <button onClick={handleRun} className="run-btn" disabled={runLoading}>
+                                {runLoading ? "Running..." : "▶️ Run"}
+                            </button>
+                            <button onClick={handleSubmit} className="submit-btn" disabled={submitLoading}>
+                                {submitLoading ? "Submitting..." : "📤 Submit"}
+                            </button>
                         </div>
                     </Box>
                     <InputOutputConsole inputValue={input} onInputChange={e => setInput(e.target.value)} outputValue={output} isOutput={true} />

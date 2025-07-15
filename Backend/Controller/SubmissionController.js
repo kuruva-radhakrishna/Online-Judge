@@ -14,6 +14,8 @@ exports.allSubmissionsByUser = async (req, res) => {
         if (!submissionsByUser) {
             return res.status(500).json({ message: "Database Issue" });
         }
+        submissionsByUser.sort((s1, s2) => new Date(s2.submittedAt) - new Date(s1.submittedAt));
+
         return res.json(submissionsByUser);
     } catch (error) {
         res.status(500).json({ message: "Internal Sever Issue" });
@@ -24,13 +26,12 @@ exports.problemSubmissionsByUSer = async (req, res) => {
     //return submissions made by the current user on the specific problem
     try {
         const id = req.params.id;
-        console.log('Submissions');
-        console.log(id);
         const submissionsByUser = await Submission.find({ user_id: req.user._id, problem_id: id });
-        console.log("submissions by user",submissionsByUser);
         if (!submissionsByUser) {
             return res.status(500).json({ message: "Database Issue" });
         }
+        submissionsByUser.sort((s1, s2) => new Date(s2.submittedAt) - new Date(s1.submittedAt));
+        console.log(submissionsByUser);
         return res.json(submissionsByUser);
     } catch (error) {
         res.status(500).json({ message: "Internal Sever Issue" });

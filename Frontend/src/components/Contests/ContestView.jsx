@@ -155,6 +155,7 @@ function ProblemsSection({ contest }) {
 function LeaderboardSection({ contestId }) {
     const [leaderboard, setLeaderboard] = useState([]);
     const [loading, setLoading] = useState(true);
+
     useEffect(() => {
         async function fetchLeaderboard() {
             try {
@@ -170,77 +171,72 @@ function LeaderboardSection({ contestId }) {
         }
         fetchLeaderboard();
     }, [contestId]);
+
     if (loading) return <div>Loading leaderboard...</div>;
     if (!leaderboard || leaderboard.length === 0)
         return <div>No leaderboard data.</div>;
+
+    const problemCount = leaderboard[0]?.problems.length || 0;
+
     return (
         <>
             <h3 className="section-title">
-                <span role="img" aria-label="leaderboard">
-                    📊
-                </span>{" "}
+                <span role="img" aria-label="leaderboard">📊</span>{" "}
                 Leaderboard
             </h3>
-            <div className="contest-leaderboard">
 
-                <table className="">
+            <div className="contest-leaderboard">
+                <table>
                     <thead>
                         <tr>
                             <th className="rank-cell">Rank</th>
                             <th>User</th>
-                            <th>Points</th>
-                            <th>Last Submission</th>
-                            <th>Solved Problems</th>
+                            <th>Total Points</th>
+                            {[...Array(problemCount)].map((_, i) => (
+                                <th key={i}>{`Q${i + 1}`}</th>
+                            ))}
                         </tr>
                     </thead>
                     <tbody>
                         {leaderboard.map((entry, idx) => (
                             <tr
-                                key={entry.user_id._id || entry.user_id}
+                                key={entry.user._id}
                                 className={`top-${idx + 1 <= 3 ? idx + 1 : ""}`}
                             >
                                 <td className="rank-cell">
                                     <span className="rank-stack">
                                         {idx === 0 && (
-                                            <span className="trophy" role="img" aria-label="gold">
-                                                🏆
-                                            </span>
+                                            <span className="trophy" role="img" aria-label="gold">🏆</span>
                                         )}
                                         {idx === 1 && (
-                                            <span className="trophy" role="img" aria-label="silver">
-                                                🥈
-                                            </span>
+                                            <span className="trophy" role="img" aria-label="silver">🥈</span>
                                         )}
                                         {idx === 2 && (
-                                            <span className="trophy" role="img" aria-label="bronze">
-                                                🥉
-                                            </span>
+                                            <span className="trophy" role="img" aria-label="bronze">🥉</span>
                                         )}
                                         <span className="rank-number">{idx + 1}</span>
                                     </span>
                                 </td>
+
                                 <td>
-                                    {entry.user_id.firstname} {entry.user_id.lastname}
+                                    {entry.user.firstname} {entry.user.lastname}
                                 </td>
-                                <td>{entry.points}</td>
-                                <td>
-                                    {entry.lastSubmission
-                                        ? new Date(entry.lastSubmission).toLocaleString()
-                                        : "-"}
-                                </td>
-                                <td>
-                                    {entry.solvedProblems.map((sp, i) =>
-                                        sp.problem_id && sp.problem_id.problemName ? (
-                                            <span className="badge" key={sp.problem_id._id || i}>
-                                                {sp.problem_id.problemName}
-                                            </span>
+
+                                <td>{entry.totalPoints}</td>
+
+                                
+
+                                {entry.problems.map((submission, i) => (
+                                    <td key={i}>
+                                        {submission?.verdict === "Accepted" ? (
+                                            <span className="badge bg-success">✅</span>
+                                        ) : submission ? (
+                                            <span className="badge bg-danger">❌</span>
                                         ) : (
-                                            <span className="badge" key={i}>
-                                                {String.fromCharCode(65 + i)}
-                                            </span>
-                                        )
-                                    )}
-                                </td>
+                                            ""
+                                        )}
+                                    </td>
+                                ))}
                             </tr>
                         ))}
                     </tbody>
@@ -249,6 +245,7 @@ function LeaderboardSection({ contestId }) {
         </>
     );
 }
+
 
 function ContestRulesSection({ contest, forceShowDescription }) {
     const defaultRules = [

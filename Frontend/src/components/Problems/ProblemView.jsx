@@ -59,7 +59,11 @@ function Problem(props) {
                 withCredentials: true
             });
             if (result && result.data) {
-                setSubmissions(result.data);
+                console.log(result.data);
+                const subs = result.data;
+                subs.sort((s1, s2) => new Date(s2.createdAt) - new Date(s1.createdAt));
+                console.log(subs);
+                setSubmissions(subs);
             } else {
                 setSubmissions([]);
             }
@@ -139,7 +143,7 @@ function Problem(props) {
         setAIReviewClicked(true);
         try {
             const result = await axios.post(`${BACKEND_URL}/ai/review`,
-                { code }, { withCredentials: true }
+                { code , problemId } , { withCredentials: true }
             );
             setReview(result.data.review);
             setAIReviewClicked(false);
@@ -165,8 +169,8 @@ function Problem(props) {
 
     return (
         <div className="problem-view">
-            <div className="row" style={{ display: "flex", height: '80vh' }}>
-                <div className="problem custom-scroll" style={{ width: "50%", height: '100%', overflowY: 'auto' }}>
+            <div className="row">
+                <div className="problem custom-scroll">
                     <div style={{ marginBottom: "1rem", display: 'flex', gap: 8 }}>
                         <button onClick={() => setTab('description')} className={tab === 'description' ? 'active-tab' : ''}>Description</button>
                         <button onClick={() => setTab('submissions')} className={tab === 'submissions' ? 'active-tab' : ''}>Submissions</button>
@@ -177,7 +181,7 @@ function Problem(props) {
                     {tab === 'discussions' && <ProblemDiscussion problemId={problemId} />}
                 </div>
                 {/* Right section: Code editor and controls */}
-                <div className="solution custom-scroll" style={{ width: "50%", height: '100%', overflowY: 'auto' }}>
+                <div className="solution custom-scroll">
                     <select
                         name="language"
                         value={language}
@@ -252,13 +256,23 @@ function Problem(props) {
                         </div>
                     )}
                     {review && (
-                        <div className="ai-review-container">
+                        <div className="ai-review-container" style={{ position: 'relative' }}>
+                            <button
+                                className="ai-close-btn"
+                                title="Close"
+                                onClick={() => setReview('')}
+                            >×</button>
                             <div className="ai-section-header">📝 <span>AI Review</span></div>
                             <div className="ai-review-content"><ReactMarkdown>{review}</ReactMarkdown></div>
                         </div>
                     )}
                     {debugResult && (
-                        <div className="ai-debug-container" style={{ marginTop: 20 }}>
+                        <div className="ai-debug-container" style={{ position: 'relative' }}>
+                            <button
+                                className="ai-close-btn"
+                                title="Close"
+                                onClick={() => setDebugResult('')}
+                            >×</button>
                             <div className="ai-section-header">🐞 <span>AI Debug</span></div>
                             <div className="ai-debug-content"><ReactMarkdown>{debugResult}</ReactMarkdown></div>
                         </div>

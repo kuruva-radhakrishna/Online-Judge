@@ -26,28 +26,12 @@ const Footer = () => {
           </span>
         </div>
         <div className="footer-right">
-          <div className="footer-links">
-            <a href="/about" className="footer-link">
-              <TrophyIcon className="footer-link-icon" />
-              About
-            </a>
-            <a href="/contact" className="footer-link">
-              <EmailIcon className="footer-link-icon" />
-              Contact
-            </a>
-            <a href="/terms" className="footer-link">
-              Terms
-            </a>
-          </div>
           <div className="footer-socials">
-            <a href="https://github.com" target="_blank" rel="noopener noreferrer" className="social-link">
+            <a href="https://github.com/kuruva-radhakrishna" target="_blank" rel="noopener noreferrer" className="social-link" title="GitHub">
               <GitHubIcon />
             </a>
-            <a href="https://linkedin.com" target="_blank" rel="noopener noreferrer" className="social-link">
+            <a href="https://www.linkedin.com/in/kuruva-radhakrishna-457167260/" target="_blank" rel="noopener noreferrer" className="social-link" title="LinkedIn">
               <LinkedInIcon />
-            </a>
-            <a href="https://twitter.com" target="_blank" rel="noopener noreferrer" className="social-link">
-              <TwitterIcon />
             </a>
           </div>
         </div>
